@@ -2,7 +2,6 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.InputSystem;
 
 public class CameraController : MonoBehaviour
 {
@@ -10,31 +9,56 @@ public class CameraController : MonoBehaviour
     private float horizontal;
     private float vertical;
     private float cameraRotate = 0f;
+    private float cameraTilt = 0f;
+
+    private bool isCameraMoving = false;
+
+    private float cameraHorizontalInput;
+    private float cameraVerticalInput;
+
+    public Vector2 cameraMovement;
 
     [SerializeField] Transform cameraFollow;
-    [SerializeField] float cameraRotationSpeed = 1f;
-    [SerializeField] float cameraHorizontalSpeed = 1f;
+    [SerializeField] float cameraPanSpeed = 1f;
+    [SerializeField] float cameraTiltSpeed = 1f;
+    [SerializeField] float cameraTiltUpperLimit = 340f;
+    [SerializeField] float cameraTiltLowerLimit = 40f;
+    [SerializeField] PlayerController playerController;
 
-    private void OnCameraMovement(InputValue value){
-        Debug.Log("Camera movement! " + value.Get<Vector2>());
-        horizontal = value.Get<Vector2>().x;
-        vertical = value.Get<Vector2>().y;
-        RotateCamera();
+    private void FixedUpdate() {
+        cameraHorizontalInput = Input.GetAxis("RightStick Horizontal");
+        cameraVerticalInput = Input.GetAxis("RightStick Vertical");
+        horizontal = cameraHorizontalInput;
+        vertical = cameraVerticalInput;
+        PanCamera(horizontal);
+        TiltCamera(vertical);
+
     }
 
-    private void RotateCamera()
+    private void TiltCamera(float v)
     {
-        cameraRotate = cameraFollow.transform.rotation.y + (horizontal * cameraRotationSpeed * Time.deltaTime);
+        cameraFollow.transform.rotation *= Quaternion.AngleAxis(v * cameraTiltSpeed, Vector3.right);
+
+        Vector3 angles = cameraFollow.transform.localEulerAngles;
+        angles.z = 0f;
+
+        float angle = cameraFollow.transform.localEulerAngles.x;
+
+        if(angle > 180 && angle < cameraTiltUpperLimit){
+            angles.x = cameraTiltUpperLimit;
+        } else if(angle < 180 && angle > cameraTiltLowerLimit){
+            angles.x = cameraTiltLowerLimit;
+        }
+
+        cameraFollow.transform.localEulerAngles = angles;
+    }
+
+    private void PanCamera(float h)
+    {
+        /*cameraRotate = cameraFollow.transform.rotation.y + (h * cameraPanSpeed * Time.deltaTime);
         cameraFollow.transform.Rotate(0f, cameraRotate, 0f);
+        */
+        cameraFollow.transform.rotation *= Quaternion.AngleAxis(h * cameraPanSpeed, Vector3.up);
     }
-
-    private void FixedUpdate(){
-        
-        
-        //move camera up/down when vertical input
-
-    }
-
-
 
 }
