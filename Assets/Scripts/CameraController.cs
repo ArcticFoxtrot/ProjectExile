@@ -8,10 +8,6 @@ public class CameraController : MonoBehaviour
 
     private float horizontal;
     private float vertical;
-    private float cameraRotate = 0f;
-    private float cameraTilt = 0f;
-
-    private bool isCameraMoving = false;
 
     private float cameraHorizontalInput;
     private float cameraVerticalInput;
@@ -55,9 +51,6 @@ public class CameraController : MonoBehaviour
 
     private void PanCamera(float h)
     {
-        /*cameraRotate = cameraFollow.transform.rotation.y + (h * cameraPanSpeed * Time.deltaTime);
-        cameraFollow.transform.Rotate(0f, cameraRotate, 0f);
-        */
         cameraFollow.transform.rotation *= Quaternion.AngleAxis(h * cameraPanSpeed, Vector3.up);
     }
 

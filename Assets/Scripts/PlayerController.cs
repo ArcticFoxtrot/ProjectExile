@@ -16,8 +16,6 @@ public class PlayerController : MonoBehaviour
     [Header("Player Movement Variables")]
     [SerializeField] float moveSpeed;
     [SerializeField] float turnSpeed;
-    [SerializeField] float maximumMovementVelocity = 10f;
-    [SerializeField] float maxVelocityChange = 10f;
     [SerializeField] float groundCheckDist = 2f;
     [SerializeField] LayerMask groundCheckIgnoreLayer;
 
@@ -29,8 +27,6 @@ public class PlayerController : MonoBehaviour
  
     [Header("Player Fall variables")]
     [SerializeField] float playerGravity;
-    [SerializeField] float maxGravityDown = 15f;
-    [SerializeField] float applyGravityModifier = .5f;
     
 
     private Vector2 movementDirection;
@@ -46,8 +42,6 @@ public class PlayerController : MonoBehaviour
     private float jumpPressTime;
     private float jumpReleaseTime;
     private float currentJumpForce;
-    private float clampedHorizontal = 0f;
-    private float clampedVertical = 0f;
     private float atanAngle;
     public bool isGrounded;
     public bool highPoint = false;
@@ -66,10 +60,6 @@ public class PlayerController : MonoBehaviour
     private void FixedUpdate() {
         MovePlayer();
         RotatePlayer();
-        
-        
-        
-        
     }
 
     private void HandleCameraDirection()
