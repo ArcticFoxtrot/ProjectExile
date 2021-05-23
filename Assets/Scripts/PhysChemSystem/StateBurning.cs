@@ -11,21 +11,24 @@ public class StateBurning : PhysChemState
     public override void RunState()
     {
         base.RunState();
-
-        Debug.Log("This was called by the stateburning class from object " + physChemMaterial.gameObject.name);
         //start timer for burnTime
         if(!physChemMaterial.canBurnInfinitely){
-            if(!physChemMaterial.burnTimerStarted){
-                physChemMaterial.burnStartTime = Time.time;
-                physChemMaterial.burnTimerStarted = true;
+            if(!physChemMaterial.statusTimerStarted){
+                physChemMaterial.statusStartTime = Time.time;
+                physChemMaterial.statusTimerStarted = true;
             }
-            if(physChemMaterial.burnTimerStarted){
-                if(Time.time - physChemMaterial.burnStartTime > physChemMaterial.burnTime){
+            if(physChemMaterial.statusTimerStarted){
+                if(Time.time - physChemMaterial.statusStartTime > physChemMaterial.statusTime){
                     Debug.Log("Object " + physChemMaterial.name + " has burnt completely!");
                     physChemMaterial.DestroySelf();
                 }
             }
         }
+    }
+
+    public override void Start() {
+        physChemMaterial.PopState(physChemMaterial.GetCurrentState());
+        base.Start();
     }
 
 }

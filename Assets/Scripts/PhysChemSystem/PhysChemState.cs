@@ -22,7 +22,8 @@ public abstract class PhysChemState
     }
 
     public virtual void EndState(){
-        physChemMaterial.SetState(this);
+        physChemMaterial.PopState(this);
+        physChemMaterial.PushState(new StateDefault(physChemMaterial));
     }
 
 }

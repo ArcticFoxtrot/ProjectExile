@@ -7,11 +7,10 @@ public class GroundChecker : MonoBehaviour
 
     private bool isGrounded = false;
 
-    private void OnTriggerEnter(Collider other) {
-        if(isGrounded != true){
+    private void OnTriggerStay(Collider other) {
+        if(other.tag != "Player"){
             isGrounded = true;
         }
-        
     }
 
     private void OnTriggerExit(Collider other) {

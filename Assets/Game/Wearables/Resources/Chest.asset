@@ -1,0 +1,22 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 20132ea794ebdf644ab1c70fcd109d62, type: 3}
+  m_Name: Chest
+  m_EditorClassIdentifier: 
+  itemID: adfv
+  displayName: Chest
+  description: The best a V-neck can be
+  icon: {fileID: 21300000, guid: 0e0e0bd416155354d9e272345ac026fb, type: 3}
+  pickup: {fileID: 2706350390294558417, guid: b3590ec0b6c2cf04a9318bf4a20fd482, type: 3}
+  isStackable: 0
+  physChemMaterialType: 1
+  allowedEquipLocation: 1

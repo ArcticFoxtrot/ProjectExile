@@ -12,7 +12,6 @@ public class StateFreezing : PhysChemState
     public override void RunState()
     {
         base.RunState();
-        base.physChemMaterial.SetState(new StateFreezing(physChemMaterial));
         Debug.Log("This was called by the statefreezing class!");
     }
 

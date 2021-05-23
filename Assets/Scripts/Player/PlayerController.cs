@@ -3,8 +3,12 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class PlayerController : MonoBehaviour
+public class PlayerController : PlayerState
 {
+
+    public PlayerController(PlayerState state) : base(state){
+
+    }
 
     [Header("Player Movement Components and Objects")]
     [SerializeField] Transform rotatePlayerPoint;
@@ -12,12 +16,15 @@ public class PlayerController : MonoBehaviour
     [SerializeField] Transform lookAtCamera;
     [SerializeField] PlayerAnimationController playerAnimationController;
     [SerializeField] GroundChecker groundChecker;
+    [SerializeField] FreeClimb freeClimb;
 
     [Header("Player Movement Variables")]
     [SerializeField] float moveSpeed;
     [SerializeField] float turnSpeed;
     [SerializeField] float groundCheckDist = 2f;
     [SerializeField] LayerMask groundCheckIgnoreLayer;
+    [SerializeField] GameObject slopeCheck;
+    [SerializeField] float slopeCheckDist;
 
     [Header("Player Jump Variables")]
     [Tooltip("Time in seconds for pressing jump button to achieve more jump force")]
@@ -47,19 +54,38 @@ public class PlayerController : MonoBehaviour
     public bool highPoint = false;
     public float yVelocity;
     public Vector3 velocityVector;
-    
+    public Vector3 surfaceAdjustedVector;
+    private float surfaceNormalAngle;
+    //private bool isClimbing = false;
+    private bool isActiveState = false;
 
+    public override void StartPlayerState()
+    {
+        base.StartPlayerState();
+        isActiveState = true;
+    }
 
-    private void Update() {
+    public override void RunPlayerState()
+    {
+        base.RunPlayerState();
         GetMovementInput();
-        //ApplyGravity(); //also handles jumping
         isGrounded = GroundCheck();
-        //isGrounded = groundChecker.GetIsGrounded();
-        }
+        SlopeCheck();
+        playerAnimationController.HandlePlayerIsGrounded(isGrounded);
+    }
+
+    public override void EndPlayerState()
+    {
+        isActiveState = false;
+        base.EndPlayerState();
+
+    }
 
     private void FixedUpdate() {
-        MovePlayer();
-        RotatePlayer();
+        if(isActiveState){
+            MovePlayer();
+            RotatePlayer();
+        }
     }
 
     private void HandleCameraDirection()
@@ -91,11 +117,9 @@ public class PlayerController : MonoBehaviour
             if(jumpReleaseTime - jumpPressTime > highJumpThreshold){
                 currentJumpForce = jumpForce * highJumpModifier;
                 shouldJump = true;
-                Debug.Log("Jump high");
             } else {
                 currentJumpForce = jumpForce;
                 shouldJump = true;
-                Debug.Log("Jump low");
             }
         }
  
@@ -103,10 +127,12 @@ public class PlayerController : MonoBehaviour
 
     private void MovePlayer(){
         if(isGrounded){
+            Vector3 slopeVector = SlopeCheck();
             float moveIntensity = Vector2.Distance(Vector2.zero, new Vector2(horizontalInput, verticalInput));
-            velocityVector = new Vector3(playerRb.transform.forward.x  * moveIntensity * moveSpeed, 0f, playerRb.transform.forward.z * moveIntensity * moveSpeed); 
+            //velocityVector = new Vector3((playerRb.transform.forward.x + slopeVector.x)  * moveIntensity * moveSpeed, 0f, (playerRb.transform.forward.z + slopeVector.z) * moveIntensity * moveSpeed);
+            velocityVector = new Vector3((slopeVector.x)  * moveIntensity * moveSpeed, 0f, (slopeVector.z) * moveIntensity * moveSpeed); 
             playerAnimationController.HandlePlayerSpeed(Mathf.Clamp01(moveIntensity));
-            yVelocity = 0f;
+            yVelocity = slopeVector.y * moveIntensity * moveSpeed;
             if(shouldJump){
                 yVelocity = jumpForce;
                 shouldJump = false;
@@ -114,13 +140,11 @@ public class PlayerController : MonoBehaviour
         } else {
             yVelocity = yVelocity - playerGravity;
         }
-
         velocityVector.y = yVelocity;
         playerRb.velocity = velocityVector;
     }
 
     private void RotatePlayer(){
-        
         if(horizontalInput != 0f || verticalInput != 0f){
             HandleCameraDirection();
             atanAngle = cameraAngle - 180 + Mathf.Atan2(horizontalInput, verticalInput) * Mathf.Rad2Deg;
@@ -134,37 +158,51 @@ public class PlayerController : MonoBehaviour
     }
 
     private bool GroundCheck(){
+        CapsuleCollider capsule = GetComponent<CapsuleCollider>();
+        RaycastHit hit;
         Ray ray = new Ray(transform.position + new Vector3(0, 0.1f, 0), Vector3.down);
-        if(Physics.Raycast(ray, out RaycastHit hitInfo, groundCheckDist, ~groundCheckIgnoreLayer)){
+        
+        if(Physics.Raycast(ray, out hit, groundCheckDist, ~groundCheckIgnoreLayer)){
             return true;
         } else {
             return false;
         }
+        
     }
 
-/*
-    private void ApplyGravity(){
-        if(playerRb.velocity.y < 0 && highPoint == false){
-            Debug.Log("Got to falling!");
-            highPoint = true;
-            
+
+    public override void StateCheck()
+    {
+        base.StateCheck();
+        ClimbCheck();
+    }
+
+    private Vector3 SlopeCheck()
+    {
+        Ray ray = new Ray(slopeCheck.transform.position, Vector3.down);
+        if(Physics.Raycast(ray, out RaycastHit hitInfo, slopeCheckDist,~groundCheckIgnoreLayer)){
+            //Debug.Log("Hitting object at position " + hitInfo.point);
+            Vector3 v = hitInfo.point - transform.position;
+            Debug.DrawLine(hitInfo.point, transform.position, Color.red, Vector3.Distance(hitInfo.point, transform.position));
+            return v;
+        } else {
+            return Vector3.zero;
         }
 
-        if(isGrounded){
-            highPoint = false;
-        }
+    }
 
-        if(highPoint == true){
-            currentGravity = Mathf.Lerp()
-        }
-            
-        if(shouldJump){
-            Debug.Log("Got to jumping!");
-            highPoint = false;
-            playerRb.AddForce(Vector3.up * jumpForce, ForceMode.Impulse);
-            shouldJump = false;
+    public void ClimbCheck(){
+        
+        //raycast forward to see if there is a surface to climb
+        Vector3 rayCastStartPos = new Vector3(transform.position.x, transform.position.y + playerFSM.wallCheckOffset, transform.position.z);
+        Ray ray = new Ray(rayCastStartPos, Vector3.forward);
+        if(Physics.Raycast(ray, out RaycastHit hit, playerFSM.climbCheckDist, ~playerFSM.climbCheckIgnoreLayer)){
+            playerAnimationController.HandlePlayerIsClimbing(true);
+            playerFSM.PushState(freeClimb);
+            EndPlayerState();
+        } else {
+            return;
         }
     }
 
-*/
 }

@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -15,13 +16,20 @@ public class PlayerAnimationController : MonoBehaviour
         }
     }
 
-    // Update is called once per frame
-    void Update()
-    {
-        
-    }
-
     public void HandlePlayerSpeed(float normalizedVelocity){
         animator.SetFloat("Speed", normalizedVelocity); //sets animator speed float to normalized speed value between 0 to 1
+    }
+
+    public void HandlePlayerIsGrounded(bool isGrounded){
+        animator.SetBool("IsGrounded", isGrounded);
+    }
+
+    public void HandlePlayerIsClimbing(bool isClimbing)
+    {
+        animator.SetBool("IsClimbing", isClimbing);
+    }
+
+    public void HandlePlayerIsClimbingLedge(bool isClimbingLedge){
+        animator.SetBool("IsClimbingLedge", isClimbingLedge);
     }
 }
