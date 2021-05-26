@@ -10,6 +10,7 @@ public class PlayerFSM : MonoBehaviour
     public LayerMask climbCheckIgnoreLayer;
     private PlayerState activeState;
     public PlayerState defaultState;
+    public PlayerState climbLedgeState;
     public List<PlayerState> stateStack;
 
     public static PlayerFSM GetPlayerFSM(){
@@ -57,7 +58,6 @@ public class PlayerFSM : MonoBehaviour
     }
 
     public void PushState(PlayerState state){
-        Debug.Log("Inserting state");
         if(GetCurrentState() != state){
             stateStack.Insert(0, state);
             stateStack[0].StartPlayerState();

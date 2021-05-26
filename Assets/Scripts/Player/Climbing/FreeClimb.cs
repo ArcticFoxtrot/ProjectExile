@@ -128,30 +128,14 @@ public class FreeClimb : PlayerState
     private void TransitionToWalk()
     {
         //TODO add a check where you see if the player is climbing up or dropping down -> animation transitions are different
-        ClimbLedge(); //only trigger this if you are climbing
+         //only trigger this if you are climbing
+         Debug.Log("Transition to walk");
         playerAnimationController.HandlePlayerIsClimbingLedge(true);
         //DropFromWall();
+        playerRb.velocity = Vector3.zero;
+        playerFSM.PushState(playerFSM.climbLedgeState);
         EndPlayerState();
-        playerFSM.PushState(defaultState);
-    }
-
-    private void ClimbLedge()
-    {
-        //Move this to its own PlayerState?
-
-        //handle movement to top of ledge
-        //get point to which we move the RB
-        Vector3 ledgePoint;
-        Ray ledgeRay = new Ray(ledgePointRaycastPosition.transform.position, Vector3.down);
-        Debug.DrawRay(ledgePointRaycastPosition.transform.position, Vector3.down, Color.green, 15f);
-        Debug.Log("ClimbLedge called!");
-        if(Physics.Raycast(ledgeRay, out RaycastHit ledgeHitInfo, climbCheckDist, ~climbSurfaceCheckIgnoreLayer)){
-            ledgePoint = ledgeHitInfo.point;
-            Debug.Log("ClimbLedge point is " + ledgePoint);
-            //translate the RB position to ledgepoint
-            playerAnimationController.HandlePlayerIsClimbing(false);
-            playerAnimationController.HandlePlayerIsClimbingLedge(true);
-        }
+        
     }
 
     private void FixedUpdate(){

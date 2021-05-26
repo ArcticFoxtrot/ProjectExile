@@ -56,8 +56,8 @@ public class PlayerController : PlayerState
     public Vector3 velocityVector;
     public Vector3 surfaceAdjustedVector;
     private float surfaceNormalAngle;
-    //private bool isClimbing = false;
     private bool isActiveState = false;
+    public bool isJumping = false;
 
     public override void StartPlayerState()
     {
@@ -93,7 +93,6 @@ public class PlayerController : PlayerState
         //checks the direction to the camera
         lookAtCamera.LookAt(Camera.main.transform.position);
         cameraAngle = lookAtCamera.transform.eulerAngles.y;
-        //Debug.Log("Camera angle is "+ cameraAngle);
     }
 
 
@@ -135,10 +134,16 @@ public class PlayerController : PlayerState
             yVelocity = slopeVector.y * moveIntensity * moveSpeed;
             if(shouldJump){
                 yVelocity = jumpForce;
+                isJumping = true;
+                Debug.Log("Got here!");
                 shouldJump = false;
             }
         } else {
             yVelocity = yVelocity - playerGravity;
+            if(!isJumping){
+                velocityVector = new Vector3(transform.forward.x * 0.1f * moveSpeed, 0f, transform.forward.z * 0.1f * moveSpeed);
+                //switch isJumping back to false when the jump has ended
+            }
         }
         velocityVector.y = yVelocity;
         playerRb.velocity = velocityVector;
@@ -152,17 +157,15 @@ public class PlayerController : PlayerState
         }
     }
 
-    private void Jump(){
-        playerRb.AddForce(Vector3.up * currentJumpForce, ForceMode.Impulse);
-        shouldJump = false;
-    }
-
     private bool GroundCheck(){
         CapsuleCollider capsule = GetComponent<CapsuleCollider>();
         RaycastHit hit;
         Ray ray = new Ray(transform.position + new Vector3(0, 0.1f, 0), Vector3.down);
         
         if(Physics.Raycast(ray, out hit, groundCheckDist, ~groundCheckIgnoreLayer)){
+            if(isJumping == true){
+                isJumping = false;
+            }
             return true;
         } else {
             return false;
@@ -186,7 +189,7 @@ public class PlayerController : PlayerState
             Debug.DrawLine(hitInfo.point, transform.position, Color.red, Vector3.Distance(hitInfo.point, transform.position));
             return v;
         } else {
-            return Vector3.zero;
+            return transform.forward;
         }
 
     }
