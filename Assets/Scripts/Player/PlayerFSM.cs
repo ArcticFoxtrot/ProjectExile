@@ -12,6 +12,7 @@ public class PlayerFSM : MonoBehaviour
     public PlayerState defaultState;
     public PlayerState climbLedgeState;
     public List<PlayerState> stateStack;
+    public bool isPaused;
 
     public static PlayerFSM GetPlayerFSM(){
         return GameObject.FindGameObjectWithTag("Player").GetComponent<PlayerFSM>();
@@ -29,9 +30,14 @@ public class PlayerFSM : MonoBehaviour
     // Update is called once per frame
     public virtual void Update()
     {
-        activeState = GetCurrentState();
-        if(activeState != null){
-            activeState.RunPlayerState();
+        if(!isPaused){
+            Time.timeScale = 1f;
+            activeState = GetCurrentState();
+            if(activeState != null){
+                activeState.RunPlayerState();
+            }
+        } else {
+            Time.timeScale = 0f;
         }
     }
 

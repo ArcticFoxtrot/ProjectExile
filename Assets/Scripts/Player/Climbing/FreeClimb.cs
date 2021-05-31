@@ -11,15 +11,24 @@ public class FreeClimb : PlayerState
     }
 
     //[SerializeField] float wallCheckOffset = 1f;
+    [Header("Player Climb Variables")]
     [SerializeField] float climbCheckDist = .2f;
     [SerializeField] float climbSpeed = 1f;
     [SerializeField] float climbAdjustAngleSpeed = 1f;
+
+    [Header("Surface Adaptation Variables")]
     [SerializeField] Transform climbSurfaceCheckRaycastPosition;
     [SerializeField] float climbSurfaceCheckRaycastUpperOffset = .5f;
     [SerializeField] float surfaceSlopeClimbMultiplier = 1.5f;
     [SerializeField] LayerMask climbSurfaceCheckIgnoreLayer;
     [SerializeField] Transform ledgePointRaycastPosition;
     [SerializeField] float ledgeClimbSpeed = 3f;
+
+    [Header("Corner Checking Variables")]
+    [SerializeField] Transform leftCornerRaycastPosition;
+    [SerializeField] Transform rightCornerRaycastPosition;
+    [SerializeField] float cornerCheckAngle = .5f;
+    [SerializeField] float cornerCheckDist = 1f;
 
     public bool isClimbing = false;
 
@@ -65,7 +74,6 @@ public class FreeClimb : PlayerState
     public override void StateCheck()
     {
         base.StateCheck();
-        WalkCheck();
         //TODO Jump and JumpCheck?
     }
 
@@ -84,13 +92,6 @@ public class FreeClimb : PlayerState
             playerRb.constraints = RigidbodyConstraints.None;
         }
 
-    }
-
-
-    private void WalkCheck()
-    {
-        //This method does the necessary checks to change state from climb back to walk/run
-        //first we check the angle of the slope we are on
     }
 
     private void SurfaceCheck(){
@@ -123,13 +124,34 @@ public class FreeClimb : PlayerState
             playerRb.MoveRotation(Quaternion.Slerp(rotatePlayerPoint.rotation, Quaternion.Euler(0f, atanAngle, 0f), turnSpeed * Time.fixedDeltaTime));
         }
         */
+
+        //check for the angle to which player is climbing horizontally -> turn corners
+        Debug.DrawRay(leftCornerRaycastPosition.transform.position, transform.forward + new Vector3(cornerCheckAngle, 0f, 0f), Color.magenta, .2f);
+        Debug.DrawRay(rightCornerRaycastPosition.transform.position, transform.forward + new Vector3(-cornerCheckAngle, 0f, 0f), Color.magenta, .2f);
+
+        Ray leftCornerRay = new Ray(leftCornerRaycastPosition.transform.position, transform.forward + new Vector3(cornerCheckAngle, 0f, 0f));
+        Ray rightCornerRay = new Ray(rightCornerRaycastPosition.transform.position, transform.forward + new Vector3(-cornerCheckAngle, 0f, 0f));
+
+        if(Physics.Raycast(leftCornerRay, out RaycastHit leftCornerHitInfo, cornerCheckDist, ~climbSurfaceCheckIgnoreLayer)){
+            Debug.Log("There's a hit on the left");
+            //get the angle of the hit point
+            //Debug.Log("Normal of the left hit point is " + leftCornerHitInfo.normal);
+            //Debug.Log("Upper surface hit point normal is " + upperHitInfo.normal);
+            if(leftCornerHitInfo.normal != upperHitInfo.normal){
+                Debug.Log("Initiate left corner turn");
+            }
+        }
+
+        if(Physics.Raycast(rightCornerRay, out RaycastHit rightCornerHitInfo, cornerCheckDist, ~climbSurfaceCheckIgnoreLayer)){
+            Debug.Log("There's a hit on the right");
+        }
     }
 
     private void TransitionToWalk()
     {
         //TODO add a check where you see if the player is climbing up or dropping down -> animation transitions are different
          //only trigger this if you are climbing
-         Debug.Log("Transition to walk");
+        Debug.Log("Transition to walk");
         playerAnimationController.HandlePlayerIsClimbingLedge(true);
         //DropFromWall();
         playerRb.velocity = Vector3.zero;

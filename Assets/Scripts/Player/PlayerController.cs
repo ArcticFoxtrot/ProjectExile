@@ -163,7 +163,7 @@ public class PlayerController : PlayerState
         Ray ray = new Ray(transform.position + new Vector3(0, 0.1f, 0), Vector3.down);
         
         if(Physics.Raycast(ray, out hit, groundCheckDist, ~groundCheckIgnoreLayer)){
-            if(isJumping == true){
+            if(isJumping == true && isGrounded == false){
                 isJumping = false;
             }
             return true;
@@ -198,7 +198,7 @@ public class PlayerController : PlayerState
         
         //raycast forward to see if there is a surface to climb
         Vector3 rayCastStartPos = new Vector3(transform.position.x, transform.position.y + playerFSM.wallCheckOffset, transform.position.z);
-        Ray ray = new Ray(rayCastStartPos, Vector3.forward);
+        Ray ray = new Ray(rayCastStartPos, transform.forward);
         if(Physics.Raycast(ray, out RaycastHit hit, playerFSM.climbCheckDist, ~playerFSM.climbCheckIgnoreLayer)){
             playerAnimationController.HandlePlayerIsClimbing(true);
             playerFSM.PushState(freeClimb);

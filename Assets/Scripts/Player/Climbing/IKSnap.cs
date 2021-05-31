@@ -1,9 +1,11 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
 public class IKSnap : MonoBehaviour
 {
+    [SerializeField] Transform playerObject;
     [SerializeField] LayerMask ignorePlayerLayer;
     [SerializeField] Transform handIKRaycastPosition;
     [SerializeField] float handIKRaycastDist = 0.5f;
@@ -19,6 +21,8 @@ public class IKSnap : MonoBehaviour
     [SerializeField] Vector3 rightFootOffset;
     public Quaternion leftFootRotOffset;
     public Quaternion rightFootRotOffset;
+    public float playerYRotation;
+    public float raycastposRotY;
     
 
     
@@ -60,17 +64,18 @@ public class IKSnap : MonoBehaviour
     // Update is called once per frame
     void FixedUpdate()
     {
+        HandleTransformRotations();
         RaycastHit leftHandHit;
         RaycastHit rightHandHit;
         RaycastHit rightFootHit;
         RaycastHit leftFootHit;
-        Debug.DrawRay(handIKRaycastPosition.transform.position, -transform.up + new Vector3(-handIKRaycastAngleBetween, 0f, handIKRaycastAngle), Color.blue, handIKRaycastDist);
-        Debug.DrawRay(handIKRaycastPosition.transform.position, -transform.up + new Vector3(handIKRaycastAngleBetween, 0f, handIKRaycastAngle), Color.blue, handIKRaycastDist);
+        Debug.DrawRay(handIKRaycastPosition.transform.position, -handIKRaycastPosition.transform.up + playerObject.transform.forward + (playerObject.transform.right * handIKRaycastAngleBetween), Color.red, handIKRaycastDist);
+        Debug.DrawRay(handIKRaycastPosition.transform.position, -handIKRaycastPosition.transform.up + playerObject.transform.forward - (playerObject.transform.right * handIKRaycastAngleBetween), Color.green, handIKRaycastDist);
         Debug.DrawRay(leftFootIKRaycastPosition.transform.position, transform.forward, Color.cyan, footIKRaycastDist);
         Debug.DrawRay(rightFootIKRaycastPosition.transform.position, transform.forward, Color.cyan, footIKRaycastDist);
 
         //left hand IK check
-        if(Physics.Raycast(handIKRaycastPosition.transform.position, -transform.up + new Vector3(-handIKRaycastAngleBetween, 0f, handIKRaycastAngle), out leftHandHit, handIKRaycastDist, ~ignorePlayerLayer)){
+        if(Physics.Raycast(handIKRaycastPosition.transform.position, -handIKRaycastPosition.transform.up + playerObject.transform.forward - (playerObject.transform.right * handIKRaycastAngleBetween), out leftHandHit, handIKRaycastDist, ~ignorePlayerLayer)){
             leftHandIK = true;
             leftHandPos = leftHandHit.point - leftHandOffset;
             leftHandPos.x = leftHandOriginalPos.x;
@@ -80,7 +85,7 @@ public class IKSnap : MonoBehaviour
             leftHandIK = false;
         }
 
-        if(Physics.Raycast(handIKRaycastPosition.transform.position, -transform.up + new Vector3(handIKRaycastAngleBetween, 0f, handIKRaycastAngle), out rightHandHit, handIKRaycastDist, ~ignorePlayerLayer)){
+        if(Physics.Raycast(handIKRaycastPosition.transform.position, -handIKRaycastPosition.transform.up + playerObject.transform.forward + (playerObject.transform.right * handIKRaycastAngleBetween), out rightHandHit, handIKRaycastDist, ~ignorePlayerLayer)){
             rightHandIK = true;
             rightHandPos = rightHandHit.point - rightHandOffset;
             rightHandPos.x = rightHandOriginalPos.x;
@@ -107,6 +112,11 @@ public class IKSnap : MonoBehaviour
         }
 
 
+    }
+
+    private void HandleTransformRotations()
+    {
+        playerYRotation = playerObject.transform.rotation.y;
     }
 
     private void OnAnimatorIK(int layerIndex) {
