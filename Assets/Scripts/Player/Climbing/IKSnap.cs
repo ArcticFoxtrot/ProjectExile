@@ -69,7 +69,7 @@ public class IKSnap : MonoBehaviour
         RaycastHit rightHandHit;
         RaycastHit rightFootHit;
         RaycastHit leftFootHit;
-        Debug.DrawRay(handIKRaycastPosition.transform.position, -handIKRaycastPosition.transform.up + playerObject.transform.forward + (playerObject.transform.right * handIKRaycastAngleBetween), Color.red, handIKRaycastDist);
+        Debug.DrawRay(handIKRaycastPosition.transform.position, -handIKRaycastPosition.transform.up + playerObject.transform.forward + (playerObject.transform.right * handIKRaycastAngleBetween), Color.green, handIKRaycastDist);
         Debug.DrawRay(handIKRaycastPosition.transform.position, -handIKRaycastPosition.transform.up + playerObject.transform.forward - (playerObject.transform.right * handIKRaycastAngleBetween), Color.green, handIKRaycastDist);
         Debug.DrawRay(leftFootIKRaycastPosition.transform.position, transform.forward, Color.cyan, footIKRaycastDist);
         Debug.DrawRay(rightFootIKRaycastPosition.transform.position, transform.forward, Color.cyan, footIKRaycastDist);

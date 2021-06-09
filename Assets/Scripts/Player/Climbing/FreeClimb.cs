@@ -29,20 +29,26 @@ public class FreeClimb : PlayerState
     [SerializeField] Transform rightCornerRaycastPosition;
     [SerializeField] float cornerCheckAngle = .5f;
     [SerializeField] float cornerCheckDist = 1f;
+    [SerializeField] float cornerAdjustAngleSpeed = 0.5f;
 
     public bool isClimbing = false;
 
-    private float horizontalInput;
+    public float horizontalInput;
     private float verticalInput;
     private bool jumpInput;
+    private bool isMovingLeft = false;
+    private bool isMovingRight = false;
     private Vector3 velocityVector;
     private Rigidbody playerRb;
     private GameObject climbSurface;
     private bool isActiveState = false;
     public Vector3 surfaceSlopeVector;
-    private float surfaceXRotation;
+    public float surfaceXRotation;
+    public float surfaceYRotation;
     public Vector3 lowerSurfaceHitPoint;
     public Vector3 upperSurfaceHitPoint;
+    public Vector3 leftRightSurfaceVector;
+
 
     private PlayerAnimationController playerAnimationController;
 
@@ -100,8 +106,7 @@ public class FreeClimb : PlayerState
         Debug.DrawRay(climbSurfaceCheckRaycastPosition.transform.position, transform.forward, Color.green, .1f);
         Debug.DrawRay(climbSurfaceCheckRaycastPosition.transform.position + new Vector3(0f, climbSurfaceCheckRaycastUpperOffset, 0f), transform.forward, Color.green, .1f);
         if(Physics.Raycast(lowerRay, out RaycastHit hitInfo, climbCheckDist + 1f, ~climbSurfaceCheckIgnoreLayer)){
-            surfaceXRotation = Vector3.Angle(Vector3.up, hitInfo.collider.transform.up) - 90f;
-            //Debug.Log("surfaceSlopeVector is " + surfaceSlopeVector);
+            surfaceXRotation = Vector3.Angle(transform.up, hitInfo.collider.transform.up);
             lowerSurfaceHitPoint = hitInfo.point;
         } else {
             surfaceXRotation = 0f;
@@ -113,37 +118,46 @@ public class FreeClimb : PlayerState
         } else {
             upperSurfaceHitPoint = Vector3.zero;
             //we need to transition to climbing up since the higher check fails
-            TransitionToWalk();
+            //TransitionToWalk();
         }
 
         surfaceSlopeVector = upperSurfaceHitPoint - lowerSurfaceHitPoint;
-/*
-                if(horizontalInput != 0f || verticalInput != 0f){
-            HandleCameraDirection();
-            atanAngle = cameraAngle - 180 + Mathf.Atan2(horizontalInput, verticalInput) * Mathf.Rad2Deg;
-            playerRb.MoveRotation(Quaternion.Slerp(rotatePlayerPoint.rotation, Quaternion.Euler(0f, atanAngle, 0f), turnSpeed * Time.fixedDeltaTime));
-        }
-        */
 
         //check for the angle to which player is climbing horizontally -> turn corners
-        Debug.DrawRay(leftCornerRaycastPosition.transform.position, transform.forward + new Vector3(cornerCheckAngle, 0f, 0f), Color.magenta, .2f);
-        Debug.DrawRay(rightCornerRaycastPosition.transform.position, transform.forward + new Vector3(-cornerCheckAngle, 0f, 0f), Color.magenta, .2f);
+        Debug.DrawRay(leftCornerRaycastPosition.transform.position, transform.forward + (transform.right * cornerCheckAngle), Color.magenta, .2f);
+        Debug.DrawRay(rightCornerRaycastPosition.transform.position, transform.forward + (transform.right * -cornerCheckAngle), Color.magenta, .2f);
 
-        Ray leftCornerRay = new Ray(leftCornerRaycastPosition.transform.position, transform.forward + new Vector3(cornerCheckAngle, 0f, 0f));
-        Ray rightCornerRay = new Ray(rightCornerRaycastPosition.transform.position, transform.forward + new Vector3(-cornerCheckAngle, 0f, 0f));
+        Ray leftCornerRay = new Ray(leftCornerRaycastPosition.transform.position, transform.forward + (transform.right * cornerCheckAngle));
+        Ray rightCornerRay = new Ray(rightCornerRaycastPosition.transform.position, transform.forward + (transform.right * -cornerCheckAngle));
 
-        if(Physics.Raycast(leftCornerRay, out RaycastHit leftCornerHitInfo, cornerCheckDist, ~climbSurfaceCheckIgnoreLayer)){
-            Debug.Log("There's a hit on the left");
+        float angle = 0f;
+        if(isMovingLeft){
+            if(Physics.Raycast(leftCornerRay, out RaycastHit leftCornerHitInfo, cornerCheckDist, ~climbSurfaceCheckIgnoreLayer)){
+                Debug.Log("Going left!");
+                leftRightSurfaceVector = leftCornerHitInfo.point - new Vector3(upperHitInfo.point.x, leftCornerHitInfo.point.y, upperHitInfo.point.z);
+                Debug.DrawLine(new Vector3(upperHitInfo.point.x, leftCornerHitInfo.point.y, upperHitInfo.point.z), leftCornerHitInfo.point, Color.white, .2f );
+                angle = Vector3.Angle(-1 * transform.right, leftRightSurfaceVector.normalized);
+                surfaceYRotation = transform.rotation.eulerAngles.y - angle;
             //get the angle of the hit point
-            //Debug.Log("Normal of the left hit point is " + leftCornerHitInfo.normal);
-            //Debug.Log("Upper surface hit point normal is " + upperHitInfo.normal);
-            if(leftCornerHitInfo.normal != upperHitInfo.normal){
-                Debug.Log("Initiate left corner turn");
-            }
-        }
+                if(leftCornerHitInfo.normal != upperHitInfo.normal){
+                    Debug.Log("Initiate left corner turn");
+                    //surfaceYRotation = Vector3.Angle(-transform.right, leftCornerHitInfo.normal);
 
-        if(Physics.Raycast(rightCornerRay, out RaycastHit rightCornerHitInfo, cornerCheckDist, ~climbSurfaceCheckIgnoreLayer)){
-            Debug.Log("There's a hit on the right");
+                }
+            }
+        } else if(isMovingRight){
+            if(Physics.Raycast(rightCornerRay, out RaycastHit rightCornerHitInfo, cornerCheckDist, ~climbSurfaceCheckIgnoreLayer)){
+                Debug.Log("Going right!");
+                leftRightSurfaceVector = rightCornerHitInfo.point - new Vector3(upperHitInfo.point.x, rightCornerHitInfo.point.y, upperHitInfo.point.z);
+                Debug.DrawLine(new Vector3(upperHitInfo.point.x, rightCornerHitInfo.point.y, upperHitInfo.point.z), rightCornerHitInfo.point, Color.white, .2f );
+                angle = Vector3.Angle(transform.right, leftRightSurfaceVector.normalized);
+                surfaceYRotation = transform.rotation.eulerAngles.y + angle;
+                if(rightCornerHitInfo.normal != upperHitInfo.normal){
+                    Debug.Log("Initiate right corner turn");
+                }
+            }
+        } else {
+            //surfaceYRotation = 0f;
         }
     }
 
@@ -167,14 +181,24 @@ public class FreeClimb : PlayerState
     }
 
     private void Climb(){
-        float moveIntensity = Vector2.Distance(Vector2.zero, new Vector2(horizontalInput, verticalInput)); //get if player wants to move slow or fast
-        velocityVector = new Vector3(playerRb.transform.right.x * horizontalInput * climbSpeed, playerRb.transform.up.y * verticalInput * climbSpeed, surfaceSlopeVector.z * verticalInput * climbSpeed * surfaceSlopeClimbMultiplier);
+        velocityVector = new Vector3(transform.TransformVector(leftRightSurfaceVector).x * Mathf.Abs(horizontalInput) * climbSpeed, Vector3.up.y * verticalInput * climbSpeed, (leftRightSurfaceVector.z + surfaceSlopeVector.z) * verticalInput * climbSpeed * surfaceSlopeClimbMultiplier);
         playerRb.velocity = velocityVector;
-        playerRb.MoveRotation(Quaternion.Slerp(transform.rotation, Quaternion.Euler(surfaceXRotation, 0f, 0f), climbAdjustAngleSpeed * Time.fixedDeltaTime));
+        playerRb.MoveRotation(Quaternion.Slerp(transform.rotation, Quaternion.Euler(surfaceXRotation, surfaceYRotation, 0f), climbAdjustAngleSpeed * Time.fixedDeltaTime));
     }
 
     private void GetClimbInput(){
         horizontalInput = Input.GetAxis("Horizontal"); //left = -1, right = 1
+        if(horizontalInput < 0){
+            isMovingLeft = true;
+        } else {
+            isMovingLeft = false;
+        }
+
+        if(horizontalInput > 0){
+            isMovingRight = true;
+        } else {
+            isMovingRight = false;
+        }
         verticalInput = Input.GetAxis("Vertical"); //up and down
         jumpInput = Input.GetButton("Jump");
         //HandleJump(); //TODO create function to jump off wall
