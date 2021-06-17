@@ -1592,8 +1592,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   cameraMovement: {x: 0, y: 0}
   cameraFollow: {fileID: 56226243}
-  cameraPanSpeed: 2.5
-  cameraTiltSpeed: 2.5
+  cameraPanSpeed: 100
+  cameraTiltSpeed: 100
   cameraTiltUpperLimit: 340
   cameraTiltLowerLimit: 40
   playerController: {fileID: 0}
@@ -2995,8 +2995,8 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1022444008}
-  m_LocalRotation: {x: -0, y: -0.80241156, z: -0, w: 0.596771}
-  m_LocalPosition: {x: -5.66, y: 0.05, z: -2.52}
+  m_LocalRotation: {x: 0, y: -0.97820216, z: 0, w: 0.20765506}
+  m_LocalPosition: {x: -5.8, y: 0.05, z: -3.07}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:
   - {fileID: 217684231}
@@ -3013,7 +3013,7 @@ Transform:
   - {fileID: 1158348082}
   m_Father: {fileID: 0}
   m_RootOrder: 5
-  m_LocalEulerAnglesHint: {x: 0, y: -106.722, z: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 563.97, z: 0}
 --- !u!114 &1022444014
 MonoBehaviour:
   m_ObjectHideFlags: 0

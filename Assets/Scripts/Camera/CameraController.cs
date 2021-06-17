@@ -21,7 +21,7 @@ public class CameraController : MonoBehaviour
     [SerializeField] float cameraTiltLowerLimit = 40f;
     [SerializeField] PlayerController playerController;
 
-    private void FixedUpdate() {
+    private void Update() {
         cameraHorizontalInput = Input.GetAxis("RightStick Horizontal");
         cameraVerticalInput = Input.GetAxis("RightStick Vertical");
         horizontal = cameraHorizontalInput;
@@ -33,7 +33,7 @@ public class CameraController : MonoBehaviour
 
     private void TiltCamera(float v)
     {
-        cameraFollow.transform.rotation *= Quaternion.AngleAxis(v * cameraTiltSpeed, Vector3.right);
+        cameraFollow.transform.rotation *= Quaternion.AngleAxis(v * cameraTiltSpeed* Time.deltaTime, Vector3.right );
 
         Vector3 angles = cameraFollow.transform.localEulerAngles;
         angles.z = 0f;
@@ -51,7 +51,7 @@ public class CameraController : MonoBehaviour
 
     private void PanCamera(float h)
     {
-        cameraFollow.transform.rotation *= Quaternion.AngleAxis(h * cameraPanSpeed, Vector3.up);
+        cameraFollow.transform.rotation *= Quaternion.AngleAxis(h * cameraPanSpeed * Time.deltaTime, Vector3.up);
     }
 
 }
