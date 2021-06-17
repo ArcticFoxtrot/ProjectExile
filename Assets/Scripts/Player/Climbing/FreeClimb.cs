@@ -166,13 +166,10 @@ public class FreeClimb : PlayerState
                 Debug.DrawLine(new Vector3(upperHitInfo.point.x, rightCornerHitInfo.point.y, upperHitInfo.point.z), rightCornerHitInfo.point, Color.white, .2f );
                 if(Vector3.Cross(rightCornerHitInfo.normal, upperHitInfo.normal).y >= 0f){
                     angle = -1 * Vector3.Angle(transform.right, leftRightSurfaceVector.normalized);
-                    surfaceYRotation = transform.rotation.eulerAngles.y + angle;
                 } else {
                     angle = Vector3.Angle(-1 * transform.right, leftRightSurfaceVector.normalized);
-                    surfaceYRotation = transform.rotation.eulerAngles.y + angle;
                 }
-                angle = Vector3.Angle(transform.right, leftRightSurfaceVector.normalized);
-                //surfaceYRotation = transform.rotation.eulerAngles.y - angle;
+                surfaceYRotation = transform.rotation.eulerAngles.y + angle;
                 if(rightCornerHitInfo.normal != upperHitInfo.normal){
                     Debug.Log("Initiate right corner turn");
                 }
@@ -204,7 +201,7 @@ public class FreeClimb : PlayerState
     private void Climb(){
         //velocityVector = new Vector3(leftRightSurfaceVector.x * Mathf.Abs(horizontalInput) * climbSpeed, Vector3.up.y * verticalInput * climbSpeed, (leftRightSurfaceVector.z + surfaceSlopeVector.z) * verticalInput * climbSpeed * surfaceSlopeClimbMultiplier);
         //playerRb.velocity = velocityVector;
-        climbVector = new Vector3(Mathf.Abs(leftRightSurfaceVector.x) * horizontalInput, Vector3.up.y * verticalInput, leftRightSurfaceVector.z * Mathf.Abs(horizontalInput)) * Time.fixedDeltaTime * climbSpeed;
+        climbVector = new Vector3(leftRightSurfaceVector.x * Mathf.Abs(horizontalInput), Vector3.up.y * verticalInput, leftRightSurfaceVector.z * Mathf.Abs(horizontalInput)) * Time.fixedDeltaTime * climbSpeed;
         Debug.DrawRay(transform.position, climbVector.normalized, Color.blue, .2f);
         playerRb.MovePosition(transform.position + climbVector);
         playerRb.MoveRotation(Quaternion.Slerp(transform.rotation, Quaternion.Euler(surfaceXRotation, surfaceYRotation, 0f), climbAdjustAngleSpeed * Time.fixedDeltaTime));
