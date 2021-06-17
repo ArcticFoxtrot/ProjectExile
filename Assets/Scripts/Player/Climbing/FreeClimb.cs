@@ -48,6 +48,9 @@ public class FreeClimb : PlayerState
     public Vector3 lowerSurfaceHitPoint;
     public Vector3 upperSurfaceHitPoint;
     public Vector3 leftRightSurfaceVector;
+    public Vector3 climbVector;
+    public bool rotate = false;
+    public float angle;
 
 
     private PlayerAnimationController playerAnimationController;
@@ -86,6 +89,7 @@ public class FreeClimb : PlayerState
     public void StartClimb(){
         playerRb.useGravity = false;
         isClimbing = true;
+        playerRb.velocity = Vector3.zero;
         //ToggleFreezeRotations(true);
     }
 
@@ -130,34 +134,51 @@ public class FreeClimb : PlayerState
         Ray leftCornerRay = new Ray(leftCornerRaycastPosition.transform.position, transform.forward + (transform.right * cornerCheckAngle));
         Ray rightCornerRay = new Ray(rightCornerRaycastPosition.transform.position, transform.forward + (transform.right * -cornerCheckAngle));
 
-        float angle = 0f;
         if(isMovingLeft){
             if(Physics.Raycast(leftCornerRay, out RaycastHit leftCornerHitInfo, cornerCheckDist, ~climbSurfaceCheckIgnoreLayer)){
+                //Debug.Log("Angle between normals is " + Vector3.SignedAngle(upperHitInfo.normal, leftCornerHitInfo.normal, Vector3.up));¨
+                //when going left the y for cross is negative if obtuse angle
+                Debug.Log("Cross between normals is " + Vector3.Cross(leftCornerHitInfo.normal, upperHitInfo.normal));
                 Debug.Log("Going left!");
                 leftRightSurfaceVector = leftCornerHitInfo.point - new Vector3(upperHitInfo.point.x, leftCornerHitInfo.point.y, upperHitInfo.point.z);
                 Debug.DrawLine(new Vector3(upperHitInfo.point.x, leftCornerHitInfo.point.y, upperHitInfo.point.z), leftCornerHitInfo.point, Color.white, .2f );
-                angle = Vector3.Angle(-1 * transform.right, leftRightSurfaceVector.normalized);
-                surfaceYRotation = transform.rotation.eulerAngles.y - angle;
-            //get the angle of the hit point
+                if(Vector3.Cross(leftCornerHitInfo.normal, upperHitInfo.normal).y <= 0f){
+                    angle = -1 * (360f + Vector3.Angle(-1 * transform.right, leftRightSurfaceVector.normalized));
+                } else {
+                    angle = Vector3.Angle(-1 * transform.right, leftRightSurfaceVector.normalized);
+                }
+                surfaceYRotation = transform.rotation.eulerAngles.y - angle; 
+                //get the angle of the hit point
                 if(leftCornerHitInfo.normal != upperHitInfo.normal){
                     Debug.Log("Initiate left corner turn");
-                    //surfaceYRotation = Vector3.Angle(-transform.right, leftCornerHitInfo.normal);
+                //surfaceYRotation = Vector3.Angle(-transform.right, leftCornerHitInfo.normal);
+
 
                 }
             }
         } else if(isMovingRight){
             if(Physics.Raycast(rightCornerRay, out RaycastHit rightCornerHitInfo, cornerCheckDist, ~climbSurfaceCheckIgnoreLayer)){
+                //Debug.Log("Angle between normals is " + Vector3.SignedAngle(upperHitInfo.normal, rightCornerHitInfo.normal, Vector3.up));
+                //when going right the y for cross is negative for acute angle
+                Debug.Log("Cross between normals is " + Vector3.Cross(rightCornerHitInfo.normal, upperHitInfo.normal));
                 Debug.Log("Going right!");
                 leftRightSurfaceVector = rightCornerHitInfo.point - new Vector3(upperHitInfo.point.x, rightCornerHitInfo.point.y, upperHitInfo.point.z);
                 Debug.DrawLine(new Vector3(upperHitInfo.point.x, rightCornerHitInfo.point.y, upperHitInfo.point.z), rightCornerHitInfo.point, Color.white, .2f );
+                if(Vector3.Cross(rightCornerHitInfo.normal, upperHitInfo.normal).y >= 0f){
+                    angle = -1 * Vector3.Angle(transform.right, leftRightSurfaceVector.normalized);
+                    surfaceYRotation = transform.rotation.eulerAngles.y + angle;
+                } else {
+                    angle = Vector3.Angle(-1 * transform.right, leftRightSurfaceVector.normalized);
+                    surfaceYRotation = transform.rotation.eulerAngles.y + angle;
+                }
                 angle = Vector3.Angle(transform.right, leftRightSurfaceVector.normalized);
-                surfaceYRotation = transform.rotation.eulerAngles.y + angle;
+                //surfaceYRotation = transform.rotation.eulerAngles.y - angle;
                 if(rightCornerHitInfo.normal != upperHitInfo.normal){
                     Debug.Log("Initiate right corner turn");
                 }
             }
         } else {
-            //surfaceYRotation = 0f;
+            leftRightSurfaceVector = Vector3.zero;
         }
     }
 
@@ -181,9 +202,13 @@ public class FreeClimb : PlayerState
     }
 
     private void Climb(){
-        velocityVector = new Vector3(transform.TransformVector(leftRightSurfaceVector).x * Mathf.Abs(horizontalInput) * climbSpeed, Vector3.up.y * verticalInput * climbSpeed, (leftRightSurfaceVector.z + surfaceSlopeVector.z) * verticalInput * climbSpeed * surfaceSlopeClimbMultiplier);
-        playerRb.velocity = velocityVector;
+        //velocityVector = new Vector3(leftRightSurfaceVector.x * Mathf.Abs(horizontalInput) * climbSpeed, Vector3.up.y * verticalInput * climbSpeed, (leftRightSurfaceVector.z + surfaceSlopeVector.z) * verticalInput * climbSpeed * surfaceSlopeClimbMultiplier);
+        //playerRb.velocity = velocityVector;
+        climbVector = new Vector3(Mathf.Abs(leftRightSurfaceVector.x) * horizontalInput, Vector3.up.y * verticalInput, leftRightSurfaceVector.z * Mathf.Abs(horizontalInput)) * Time.fixedDeltaTime * climbSpeed;
+        Debug.DrawRay(transform.position, climbVector.normalized, Color.blue, .2f);
+        playerRb.MovePosition(transform.position + climbVector);
         playerRb.MoveRotation(Quaternion.Slerp(transform.rotation, Quaternion.Euler(surfaceXRotation, surfaceYRotation, 0f), climbAdjustAngleSpeed * Time.fixedDeltaTime));
+
     }
 
     private void GetClimbInput(){
