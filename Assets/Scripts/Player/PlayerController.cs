@@ -63,6 +63,7 @@ public class PlayerController : PlayerState
     {
         base.StartPlayerState();
         isActiveState = true;
+        playerAnimationController.HandleRootMotion(false);
     }
 
     public override void RunPlayerState()
@@ -135,7 +136,6 @@ public class PlayerController : PlayerState
             if(shouldJump){
                 yVelocity = jumpForce;
                 isJumping = true;
-                Debug.Log("Got here!");
                 shouldJump = false;
             }
         } else {

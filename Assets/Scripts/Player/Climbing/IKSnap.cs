@@ -8,9 +8,12 @@ public class IKSnap : MonoBehaviour
     [SerializeField] Transform playerObject;
     [SerializeField] LayerMask ignorePlayerLayer;
     [SerializeField] Transform handIKRaycastPosition;
+    [SerializeField] Transform leftHandIKRaycastPosition;
+    [SerializeField] Transform rightHandIKRaycastPosition;
     [SerializeField] float handIKRaycastDist = 0.5f;
     [SerializeField] float handIKRaycastAngle = 0.5f;
     [SerializeField] float handIKRaycastAngleBetween = .5f;
+    [SerializeField] float handIKWeight = 1f;
     [SerializeField] Vector3 leftHandOffset;
     [SerializeField] Vector3 rightHandOffset;
 
@@ -69,12 +72,15 @@ public class IKSnap : MonoBehaviour
         RaycastHit rightHandHit;
         RaycastHit rightFootHit;
         RaycastHit leftFootHit;
-        Debug.DrawRay(handIKRaycastPosition.transform.position, -handIKRaycastPosition.transform.up + playerObject.transform.forward + (playerObject.transform.right * handIKRaycastAngleBetween), Color.green, handIKRaycastDist);
-        Debug.DrawRay(handIKRaycastPosition.transform.position, -handIKRaycastPosition.transform.up + playerObject.transform.forward - (playerObject.transform.right * handIKRaycastAngleBetween), Color.green, handIKRaycastDist);
+        //Debug.DrawRay(handIKRaycastPosition.transform.position, -handIKRaycastPosition.transform.up + playerObject.transform.forward + (playerObject.transform.right * handIKRaycastAngleBetween), Color.green, handIKRaycastDist);
+        //Debug.DrawRay(handIKRaycastPosition.transform.position, -handIKRaycastPosition.transform.up + playerObject.transform.forward - (playerObject.transform.right * handIKRaycastAngleBetween), Color.green, handIKRaycastDist);
+        Debug.DrawRay(leftHandIKRaycastPosition.position, playerObject.transform.forward, Color.green, handIKRaycastDist);
+        Debug.DrawRay(rightHandIKRaycastPosition.position, playerObject.transform.forward, Color.green, handIKRaycastDist);
         Debug.DrawRay(leftFootIKRaycastPosition.transform.position, transform.forward, Color.cyan, footIKRaycastDist);
         Debug.DrawRay(rightFootIKRaycastPosition.transform.position, transform.forward, Color.cyan, footIKRaycastDist);
 
         //left hand IK check
+        /*
         if(Physics.Raycast(handIKRaycastPosition.transform.position, -handIKRaycastPosition.transform.up + playerObject.transform.forward - (playerObject.transform.right * handIKRaycastAngleBetween), out leftHandHit, handIKRaycastDist, ~ignorePlayerLayer)){
             leftHandIK = true;
             leftHandPos = leftHandHit.point - leftHandOffset;
@@ -84,7 +90,19 @@ public class IKSnap : MonoBehaviour
         } else {
             leftHandIK = false;
         }
+        */
 
+        if(Physics.Raycast(leftHandIKRaycastPosition.position, playerObject.transform.forward, out leftHandHit, handIKRaycastDist, ~ignorePlayerLayer)){
+            leftHandIK = true;
+            leftHandPos = leftHandHit.point - leftHandOffset;
+            leftHandPos.x = leftHandOriginalPos.x;
+            //leftHandPos.z = leftFootPos.z - leftHandOffset.z;
+            leftHandRot = Quaternion.FromToRotation(Vector3.up, leftHandHit.normal);
+        } else {
+            leftHandIK = false;
+        }
+
+        /*
         if(Physics.Raycast(handIKRaycastPosition.transform.position, -handIKRaycastPosition.transform.up + playerObject.transform.forward + (playerObject.transform.right * handIKRaycastAngleBetween), out rightHandHit, handIKRaycastDist, ~ignorePlayerLayer)){
             rightHandIK = true;
             rightHandPos = rightHandHit.point - rightHandOffset;
@@ -94,6 +112,18 @@ public class IKSnap : MonoBehaviour
         } else {
             rightHandIK = false;
         }
+        */
+
+        if(Physics.Raycast(rightHandIKRaycastPosition.position, playerObject.transform.forward, out rightHandHit, handIKRaycastDist, ~ignorePlayerLayer)){
+            rightHandIK = true;
+            rightHandPos = rightHandHit.point - rightHandOffset;
+            rightHandPos.x = rightHandOriginalPos.x;
+            //rightHandPos.z = rightFootPos.z - rightHandOffset.z;
+            rightHandRot = Quaternion.FromToRotation(Vector3.up, rightHandHit.normal);
+        } else {
+            rightHandIK = false;
+        }
+
 
         if(Physics.Raycast(leftFootIKRaycastPosition.transform.position, transform.forward, out leftFootHit, footIKRaycastDist, ~ignorePlayerLayer)){
             leftFootIK = true;
@@ -126,16 +156,16 @@ public class IKSnap : MonoBehaviour
             rightHandOriginalPos = animator.GetIKPosition(AvatarIKGoal.RightHand);
             if(leftHandIK){
                 animator.SetIKPosition(AvatarIKGoal.LeftHand, leftHandPos);
-                animator.SetIKPositionWeight(AvatarIKGoal.LeftHand, 1f);
+                animator.SetIKPositionWeight(AvatarIKGoal.LeftHand, handIKWeight);
                 animator.SetIKRotation(AvatarIKGoal.LeftHand, leftHandRot);
-                animator.SetIKRotationWeight(AvatarIKGoal.LeftHand, 1f);
+                animator.SetIKRotationWeight(AvatarIKGoal.LeftHand, handIKWeight);
             }
 
             if(rightHandIK){
                 animator.SetIKPosition(AvatarIKGoal.RightHand, rightHandPos);
-                animator.SetIKPositionWeight(AvatarIKGoal.RightHand, 1f);
+                animator.SetIKPositionWeight(AvatarIKGoal.RightHand, handIKWeight);
                 animator.SetIKRotation(AvatarIKGoal.RightHand, rightHandRot);
-                animator.SetIKRotationWeight(AvatarIKGoal.RightHand, 1f);
+                animator.SetIKRotationWeight(AvatarIKGoal.RightHand, handIKWeight);
 
             }
 

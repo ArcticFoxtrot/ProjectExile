@@ -31,6 +31,7 @@ public class ClimbLedge : PlayerState
             Debug.LogWarning("Freeclimb component could not find a PlayerAnimationController component!");
         }
         
+        playerAnimationController.HandleRootMotion(false);
     }
 
     public override void RunPlayerState() {
@@ -49,25 +50,21 @@ public class ClimbLedge : PlayerState
 
     private void ClimbOverLedge()
     {
-        //Move this to its own PlayerState?
 
         //handle movement to top of ledge
         //get point to which we move the RB
        
+        playerAnimationController.HandlePlayerIsClimbing(false);
+        playerAnimationController.HandlePlayerIsClimbingLedge(true);
+    
         Debug.DrawRay(ledgePointRaycastPosition.transform.position, Vector3.down, Color.green, 15f);
+        
         if(climbPointChecked == false){
             Ray ledgeRay = new Ray(ledgePointRaycastPosition.transform.position, Vector3.down);
             if(Physics.Raycast(ledgeRay, out RaycastHit ledgeHitInfo, ledgeClimbCheckDist, ~playerFSM.climbCheckIgnoreLayer)){
+                Debug.Log("Climbledge found a ledge point!");
                 climbPointChecked = true;
                 ledgePoint = ledgeHitInfo.point;
-                //translate the RB position to ledgepoint
-               
-                //playerRb.transform.position = ledgePoint;
-                
-                //rotate the player back to vertical 
-                playerAnimationController.HandlePlayerIsClimbing(false);
-                playerAnimationController.HandlePlayerIsClimbingLedge(true);
-
             }
         }
 
@@ -78,12 +75,19 @@ public class ClimbLedge : PlayerState
         }
 
         if(climbPointChecked && Vector3.Distance(this.transform.position, ledgePoint) <= ledgePointAllowedDistance){
-            playerAnimationController.HandlePlayerIsClimbingLedge(false);
+            //playerAnimationController.HandlePlayerIsClimbingLedge(false);
             gameObject.GetComponent<Collider>().isTrigger = false;
             playerRb.isKinematic = false;
+            playerAnimationController.HandlePlayerIsClimbingLedge(false);
             EndPlayerState();
         }
         //once ledge has been climbed, make sure no velocity is applied anymore and we are back to using gravity
+
+    }
+
+    public void ClimbLedgeAnimCompleted(){
+        //playerAnimationController.HandlePlayerIsClimbingLedge(false);
+        //EndPlayerState();
     }
 
 

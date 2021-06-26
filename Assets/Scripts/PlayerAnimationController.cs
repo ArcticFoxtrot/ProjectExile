@@ -8,12 +8,13 @@ public class PlayerAnimationController : MonoBehaviour
 
     private Animator animator;
     // Start is called before the first frame update
-    void Start()
+    void Awake()
     {
         animator = GetComponent<Animator>();
         if(!animator || animator == null){
             Debug.Log("Animator not found in PlayerAnimationController");
         }
+
     }
 
     public void HandlePlayerSpeed(float normalizedVelocity){
@@ -32,4 +33,18 @@ public class PlayerAnimationController : MonoBehaviour
     public void HandlePlayerIsClimbingLedge(bool isClimbingLedge){
         animator.SetBool("IsClimbingLedge", isClimbingLedge);
     }
+
+    public void HandlePlayerClimbBlend(float vertical, float horizontal){
+        animator.SetFloat("VerticalInput", vertical);
+        animator.SetFloat("HorizontalInput", horizontal);
+    }
+
+    private void OnAnimatorMove() {
+        transform.parent.position = animator.rootPosition;
+    }
+
+    public void HandleRootMotion(bool t){
+        animator.applyRootMotion = t;
+    }
+
 }

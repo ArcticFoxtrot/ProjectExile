@@ -90,6 +90,7 @@ public class FreeClimb : PlayerState
         playerRb.useGravity = false;
         isClimbing = true;
         playerRb.velocity = Vector3.zero;
+        playerAnimationController.HandleRootMotion(true);
         //ToggleFreezeRotations(true);
     }
 
@@ -121,8 +122,9 @@ public class FreeClimb : PlayerState
             upperSurfaceHitPoint = upperHitInfo.point;
         } else {
             upperSurfaceHitPoint = Vector3.zero;
+            Debug.Log("No longer upper hit");
             //we need to transition to climbing up since the higher check fails
-            //TransitionToWalk();
+            TransitionToWalk();
         }
 
         surfaceSlopeVector = upperSurfaceHitPoint - lowerSurfaceHitPoint;
@@ -136,32 +138,24 @@ public class FreeClimb : PlayerState
 
         if(isMovingLeft){
             if(Physics.Raycast(leftCornerRay, out RaycastHit leftCornerHitInfo, cornerCheckDist, ~climbSurfaceCheckIgnoreLayer)){
-                //Debug.Log("Angle between normals is " + Vector3.SignedAngle(upperHitInfo.normal, leftCornerHitInfo.normal, Vector3.up));
-                Debug.Log("Cross between normals is " + Vector3.Cross(leftCornerHitInfo.normal, upperHitInfo.normal));
                 leftRightSurfaceVector = leftCornerHitInfo.point - new Vector3(upperHitInfo.point.x, leftCornerHitInfo.point.y, upperHitInfo.point.z);
                 Debug.DrawLine(new Vector3(upperHitInfo.point.x, leftCornerHitInfo.point.y, upperHitInfo.point.z), leftCornerHitInfo.point, Color.white, .2f );
-                if(Vector3.Cross(leftCornerHitInfo.normal, upperHitInfo.normal).y < 0f){
-                    Debug.Log("Cross Y was negative and moved left");
-                   transform.rotation = Quaternion.RotateTowards(transform.rotation, Quaternion.FromToRotation(transform.forward * -1, leftCornerHitInfo.normal) * transform.rotation, climbAdjustAngleSpeed);
-                } else if(Vector3.Cross(leftCornerHitInfo.normal, upperHitInfo.normal).y == 0f){
-                   transform.rotation = Quaternion.RotateTowards(transform.rotation, Quaternion.FromToRotation(transform.forward * -1, upperHitInfo.normal) * transform.rotation, climbAdjustAngleSpeed);
+                if(Vector3.Cross(leftCornerHitInfo.normal, upperHitInfo.normal).y == 0f){
+                    transform.rotation = Quaternion.RotateTowards(transform.rotation, Quaternion.FromToRotation(transform.forward * -1, upperHitInfo.normal) * transform.rotation, climbAdjustAngleSpeed);
+                } else if(Vector3.Cross(leftCornerHitInfo.normal, upperHitInfo.normal).y < 0f){
+                    transform.rotation = Quaternion.RotateTowards(transform.rotation, Quaternion.FromToRotation(transform.forward * -1, leftCornerHitInfo.normal) * transform.rotation, climbAdjustAngleSpeed);
                 } 
                 surfaceYRotation = transform.rotation.eulerAngles.y - angle; 
                 
             }
         } else if(isMovingRight){
             if(Physics.Raycast(rightCornerRay, out RaycastHit rightCornerHitInfo, cornerCheckDist, ~climbSurfaceCheckIgnoreLayer)){
-                //Debug.Log("Angle between normals is " + Vector3.SignedAngle(upperHitInfo.normal, rightCornerHitInfo.normal, Vector3.up));
-                Debug.Log("Cross between normals is " + Vector3.Cross(rightCornerHitInfo.normal, upperHitInfo.normal));
                 leftRightSurfaceVector = rightCornerHitInfo.point - new Vector3(upperHitInfo.point.x, rightCornerHitInfo.point.y, upperHitInfo.point.z);
                 Debug.DrawLine(new Vector3(upperHitInfo.point.x, rightCornerHitInfo.point.y, upperHitInfo.point.z), rightCornerHitInfo.point, Color.white, .2f );
-                if(Vector3.Cross(rightCornerHitInfo.normal, upperHitInfo.normal).y > 0f){
-                    Debug.Log("Cross Y was positive and moved right");
-                    //angle = -1 * Vector3.Angle(transform.right, leftRightSurfaceVector.normalized);
-                    transform.rotation = Quaternion.RotateTowards(transform.rotation, Quaternion.FromToRotation(transform.forward * -1, rightCornerHitInfo.normal) * transform.rotation, climbAdjustAngleSpeed);
-                } else if (Vector3.Cross(rightCornerHitInfo.normal, upperHitInfo.normal).y == 0f){
-                    //angle = Vector3.Angle(transform.right, leftRightSurfaceVector.normalized);
+                if(Vector3.Cross(rightCornerHitInfo.normal, upperHitInfo.normal).y == 0f){
                     transform.rotation = Quaternion.RotateTowards(transform.rotation, Quaternion.FromToRotation(transform.forward * -1, upperHitInfo.normal) * transform.rotation, climbAdjustAngleSpeed);
+                } else if (Vector3.Cross(rightCornerHitInfo.normal, upperHitInfo.normal).y > 0f){
+                    transform.rotation = Quaternion.RotateTowards(transform.rotation, Quaternion.FromToRotation(transform.forward * -1, rightCornerHitInfo.normal) * transform.rotation, climbAdjustAngleSpeed);
                 }
                 surfaceYRotation = transform.rotation.eulerAngles.y + angle;
             }
@@ -174,9 +168,6 @@ public class FreeClimb : PlayerState
     {
         //TODO add a check where you see if the player is climbing up or dropping down -> animation transitions are different
          //only trigger this if you are climbing
-        Debug.Log("Transition to walk");
-        playerAnimationController.HandlePlayerIsClimbingLedge(true);
-        //DropFromWall();
         playerRb.velocity = Vector3.zero;
         playerFSM.PushState(playerFSM.climbLedgeState);
         EndPlayerState();
@@ -194,8 +185,7 @@ public class FreeClimb : PlayerState
         //playerRb.velocity = velocityVector;
         climbVector = new Vector3(leftRightSurfaceVector.x * Mathf.Abs(horizontalInput), Vector3.up.y * verticalInput, leftRightSurfaceVector.z * Mathf.Abs(horizontalInput)) * Time.fixedDeltaTime * climbSpeed;
         Debug.DrawRay(transform.position, climbVector.normalized, Color.blue, .2f);
-        playerRb.MovePosition(transform.position + climbVector);
-        //playerRb.MoveRotation(Quaternion.Slerp(transform.rotation, Quaternion.Euler(surfaceXRotation, surfaceYRotation, 0f), climbAdjustAngleSpeed * Time.fixedDeltaTime));
+        playerAnimationController.HandlePlayerClimbBlend(verticalInput, horizontalInput);
 
     }
 
