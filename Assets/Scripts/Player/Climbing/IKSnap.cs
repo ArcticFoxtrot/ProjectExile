@@ -22,6 +22,7 @@ public class IKSnap : MonoBehaviour
     [SerializeField] float footIKRaycastDist = 0.5f;
     [SerializeField] Vector3 leftFootOffset;
     [SerializeField] Vector3 rightFootOffset;
+    [SerializeField] float footIKWeight = 1f;
     public Quaternion leftFootRotOffset;
     public Quaternion rightFootRotOffset;
     public float playerYRotation;
@@ -171,16 +172,16 @@ public class IKSnap : MonoBehaviour
 
             if(leftFootIK){
                 animator.SetIKPosition(AvatarIKGoal.LeftFoot, leftFootPos);
-                animator.SetIKPositionWeight(AvatarIKGoal.LeftFoot, 1);
+                animator.SetIKPositionWeight(AvatarIKGoal.LeftFoot, footIKWeight);
                 animator.SetIKRotation(AvatarIKGoal.LeftFoot, leftFootRot);
-                animator.SetIKRotationWeight(AvatarIKGoal.LeftFoot, 1f);
+                animator.SetIKRotationWeight(AvatarIKGoal.LeftFoot, footIKWeight);
             }
 
             if(rightFootIK){
                 animator.SetIKPosition(AvatarIKGoal.RightFoot, rightFootPos);
-                animator.SetIKPositionWeight(AvatarIKGoal.RightFoot, 1f);
+                animator.SetIKPositionWeight(AvatarIKGoal.RightFoot, footIKWeight);
                 animator.SetIKRotation(AvatarIKGoal.RightFoot, rightFootRot);
-                animator.SetIKRotationWeight(AvatarIKGoal.RightFoot, 1f);
+                animator.SetIKRotationWeight(AvatarIKGoal.RightFoot, footIKWeight);
             }
 
         }

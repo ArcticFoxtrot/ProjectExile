@@ -17,6 +17,7 @@ public class PlayerController : PlayerState
     [SerializeField] PlayerAnimationController playerAnimationController;
     [SerializeField] GroundChecker groundChecker;
     [SerializeField] FreeClimb freeClimb;
+    [SerializeField] ZTargeting zTargeting;
 
     [Header("Player Movement Variables")]
     [SerializeField] float moveSpeed;
@@ -178,6 +179,15 @@ public class PlayerController : PlayerState
     {
         base.StateCheck();
         ClimbCheck();
+        ZTargetCheck();
+    }
+
+    private void ZTargetCheck()
+    {
+        if(Input.GetKeyDown(KeyCode.U)){
+            playerFSM.PushState(zTargeting);
+            EndPlayerState();
+        }
     }
 
     private Vector3 SlopeCheck()
