@@ -22,6 +22,7 @@ public class ZTargeting : PlayerState
     private Vector3 verticalVector;
     private Vector3 velocityVector;
     private float yVelocity;
+    public Vector3 dirToTarget;
     [SerializeField] Rigidbody playerRb;
     [SerializeField] float moveSpeed;
 
@@ -52,6 +53,7 @@ public class ZTargeting : PlayerState
         if(isTargeting){
             GetMovementInput();
             MovePlayer();
+            RotateToTarget();
         }
     }
 
@@ -90,13 +92,32 @@ public class ZTargeting : PlayerState
         jumpInput = Input.GetButton("Jump");
     }
 
+    private void RotateToTarget(){
+        transform.LookAt(targetedEnemy.transform);
+    }
+
 
     private void MovePlayer(){
         //with vertical input move player toward or away from targeted player
         Vector3 slopeVector = SlopeCheck();
         float moveIntensity = Vector2.Distance(Vector2.zero, new Vector2(horizontalInput, verticalInput));
-        Vector3 dirToTarget = transform.position + targetedEnemy.transform.position;
+        dirToTarget = targetedEnemy.transform.position - transform.position;
         dirToTarget.y = 0;
+        dirToTarget.Normalize();
+        float forward = dirToTarget.z * moveSpeed * verticalInput;
+
+        //with horizontal input move player left or right in relation to the forward vector
+        Vector3 leftFromTarget = Vector3.Cross(dirToTarget, Vector3.up).normalized;
+
+        Vector3 forwardVector = (transform.forward + dirToTarget) * moveSpeed * verticalInput * Time.fixedDeltaTime;
+        Vector3 leftVector = (transform.right + leftFromTarget * -1) * moveSpeed * horizontalInput * Time.fixedDeltaTime;
+        playerRb.velocity = forwardVector + leftVector;
+        
+        Debug.DrawRay(transform.position, dirToTarget, Color.green, .2f);
+        Debug.DrawRay(transform.position, dirToTarget * -1, Color.red, .2f);
+        Debug.DrawRay(transform.position, leftFromTarget, Color.blue, .2f);
+        Debug.DrawRay(transform.position, leftFromTarget * -1, Color.yellow, .2f);
+        
         verticalVector = dirToTarget + slopeVector;
     }
 
@@ -104,7 +125,7 @@ public class ZTargeting : PlayerState
     {
         Ray ray = new Ray(slopeCheck.transform.position, Vector3.down);
         if(Physics.Raycast(ray, out RaycastHit hitInfo, slopeCheckDist,~groundCheckIgnoreLayer)){
-            //Debug.Log("Hitting object at position " + hitInfo.point);
+            Debug.Log("Hitting object at position " + hitInfo.point);
             Vector3 v = hitInfo.point - transform.position;
             Debug.DrawLine(hitInfo.point, transform.position, Color.red, Vector3.Distance(hitInfo.point, transform.position));
             return v;
