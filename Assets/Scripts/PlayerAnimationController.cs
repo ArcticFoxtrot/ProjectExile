@@ -47,4 +47,13 @@ public class PlayerAnimationController : MonoBehaviour
         animator.applyRootMotion = t;
     }
 
+    public void HandlePlayerIsZTargeting(bool t)
+    {
+        animator.SetBool("IsZTargeting", t);
+    }
+
+    public void HandlePlayerZTargetingBlend(float vertical, float horizontal){
+        animator.SetFloat("VerticalInput", vertical);
+        animator.SetFloat("HorizontalInput", horizontal);
+    }
 }

@@ -36,16 +36,18 @@ public class ZTargeting : PlayerState
         base.StartPlayerState();
         targetedEnemy = FindTargetedEnemy();
         Debug.Log("Closest enemy is " + targetedEnemy.name);
-        lookAtPos = GetLookAtPosition();
-        zTargetPosition.transform.position = lookAtPos;
         cameraController.SetLookAtTarget(zTargetPosition.transform);
         cameraController.SetFollowTarget(zTargetPosition.transform);
         isTargeting = true;
+        playerAnimationController.HandlePlayerIsZTargeting(isTargeting);
+        
     }
 
     public override void RunPlayerState()
     {
         base.RunPlayerState();
+        lookAtPos = GetLookAtPosition();
+        zTargetPosition.transform.position = lookAtPos;
         //make character face the targeted enemy
     }
 
@@ -119,13 +121,14 @@ public class ZTargeting : PlayerState
         Debug.DrawRay(transform.position, leftFromTarget * -1, Color.yellow, .2f);
         
         verticalVector = dirToTarget + slopeVector;
+        playerAnimationController.HandlePlayerZTargetingBlend(verticalInput, horizontalInput);
+        
     }
 
     private Vector3 SlopeCheck()
     {
         Ray ray = new Ray(slopeCheck.transform.position, Vector3.down);
         if(Physics.Raycast(ray, out RaycastHit hitInfo, slopeCheckDist,~groundCheckIgnoreLayer)){
-            Debug.Log("Hitting object at position " + hitInfo.point);
             Vector3 v = hitInfo.point - transform.position;
             Debug.DrawLine(hitInfo.point, transform.position, Color.red, Vector3.Distance(hitInfo.point, transform.position));
             return v;
@@ -152,5 +155,11 @@ public class ZTargeting : PlayerState
         }
     }
 
+
+    public override void EndPlayerState()
+    {
+        playerAnimationController.HandlePlayerIsZTargeting(false);
+        base.EndPlayerState();
+    }
 
 }
