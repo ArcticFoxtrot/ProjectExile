@@ -30,6 +30,10 @@ public class ZTargeting : PlayerState
     {
     }
 
+    public static ZTargeting GetZTargeting(){
+        return GameObject.FindGameObjectWithTag("Player").GetComponent<ZTargeting>();
+    }
+
 
     public override void StartPlayerState()
     {
@@ -38,6 +42,7 @@ public class ZTargeting : PlayerState
         Debug.Log("Closest enemy is " + targetedEnemy.name);
         cameraController.SetLookAtTarget(zTargetPosition.transform);
         cameraController.SetFollowTarget(zTargetPosition.transform);
+        cameraController.SetIsZTargeting(true);
         isTargeting = true;
         playerAnimationController.HandlePlayerIsZTargeting(isTargeting);
         
@@ -138,7 +143,9 @@ public class ZTargeting : PlayerState
 
     }
 
-
+    public GameObject GetZTarget(){
+        return targetedEnemy.gameObject;
+    }
 
 
     public override void StateCheck()
@@ -159,6 +166,8 @@ public class ZTargeting : PlayerState
     public override void EndPlayerState()
     {
         playerAnimationController.HandlePlayerIsZTargeting(false);
+        isTargeting = false;
+        cameraController.SetIsZTargeting(false);
         base.EndPlayerState();
     }
 
