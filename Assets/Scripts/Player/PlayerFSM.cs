@@ -11,6 +11,7 @@ public class PlayerFSM : MonoBehaviour
     private PlayerState activeState;
     public PlayerState defaultState;
     public PlayerState climbLedgeState;
+    public PlayerState combatState;
     public List<PlayerState> stateStack;
     public bool isPaused;
 

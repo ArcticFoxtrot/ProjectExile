@@ -26,8 +26,11 @@ public class ZTargeting : PlayerState
     [SerializeField] Rigidbody playerRb;
     [SerializeField] float moveSpeed;
 
-    public ZTargeting(PlayerState state) : base(state)
+    public ZTargeting(PlayerState state, Enemy enemy) : base(state)
     {
+        if(enemy){
+            targetedEnemy = enemy;
+        }
     }
 
     public static ZTargeting GetZTargeting(){
@@ -38,8 +41,10 @@ public class ZTargeting : PlayerState
     public override void StartPlayerState()
     {
         base.StartPlayerState();
-        targetedEnemy = FindTargetedEnemy();
-        Debug.Log("Closest enemy is " + targetedEnemy.name);
+        if(!targetedEnemy || targetedEnemy == null){
+            targetedEnemy = FindTargetedEnemy();
+            Debug.Log("Closest enemy is " + targetedEnemy.name);
+        }
         cameraController.SetLookAtTarget(zTargetPosition.transform);
         cameraController.SetFollowTarget(zTargetPosition.transform);
         cameraController.SetIsZTargeting(true);
@@ -157,17 +162,24 @@ public class ZTargeting : PlayerState
                 cameraController.SetLookAtTarget(cameraController.GetCameraFollowTarget());
                 cameraController.SetFollowTarget(cameraController.GetCameraFollowTarget());
                 EndPlayerState();
+                cameraController.SetIsZTargeting(false);
+                playerAnimationController.HandlePlayerIsZTargeting(false);
             }
 
+        }
+
+        //get combat input to move to combat state
+        if(Input.GetKeyDown(KeyCode.Mouse0)){
+            playerFSM.PushState(playerFSM.combatState);
+            playerFSM.combatState.SetStartCombatInput(CombatInputType.Block);
+            EndPlayerState();
         }
     }
 
 
     public override void EndPlayerState()
     {
-        playerAnimationController.HandlePlayerIsZTargeting(false);
         isTargeting = false;
-        cameraController.SetIsZTargeting(false);
         base.EndPlayerState();
     }
 

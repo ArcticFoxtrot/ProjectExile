@@ -3108,6 +3108,7 @@ GameObject:
   - component: {fileID: 1022444021}
   - component: {fileID: 1022444022}
   - component: {fileID: 1022444023}
+  - component: {fileID: 1022444024}
   m_Layer: 6
   m_Name: Player
   m_TagString: Player
@@ -3392,6 +3393,7 @@ MonoBehaviour:
     m_Bits: 64
   defaultState: {fileID: 1022444014}
   climbLedgeState: {fileID: 1022444022}
+  combatState: {fileID: 1022444024}
   stateStack: []
   isPaused: 0
 --- !u!114 &1022444022
@@ -3438,6 +3440,22 @@ MonoBehaviour:
   dirToTarget: {x: 0, y: 0, z: 0}
   playerRb: {fileID: 1022444010}
   moveSpeed: 80
+--- !u!114 &1022444024
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1022444008}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fa011a1d8c781614996b8800c8860604, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  playerFSM: {fileID: 1022444021}
+  defaultState: {fileID: 1022444014}
+  latestInputType: 0
+  playerAnimationController: {fileID: 1060026625}
 --- !u!1001 &1034007621
 PrefabInstance:
   m_ObjectHideFlags: 0

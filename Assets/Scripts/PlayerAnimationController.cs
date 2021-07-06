@@ -56,4 +56,8 @@ public class PlayerAnimationController : MonoBehaviour
         animator.SetFloat("VerticalInput", vertical);
         animator.SetFloat("HorizontalInput", horizontal);
     }
+
+    public void HandlePlayerIsAttacking(bool t, CombatInputType combatInputType, int comboCount){
+        animator.SetTrigger("IsRightHandStriking");
+    }
 }
