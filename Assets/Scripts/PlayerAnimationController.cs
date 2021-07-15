@@ -7,12 +7,21 @@ public class PlayerAnimationController : MonoBehaviour
 {
 
     private Animator animator;
+    private bool isInCombat = false;
+    private int combatInputCount;
+    private PlayerCombat playerCombat;
     // Start is called before the first frame update
     void Awake()
     {
         animator = GetComponent<Animator>();
         if(!animator || animator == null){
             Debug.Log("Animator not found in PlayerAnimationController");
+        }        
+        combatInputCount = -1;
+
+        playerCombat = GetComponentInParent<PlayerCombat>();
+        if(!playerCombat || playerCombat == null){
+            Debug.Log("player animator controller could not find a PlayerCombat component in its parent gameobject");
         }
 
     }
@@ -59,5 +68,28 @@ public class PlayerAnimationController : MonoBehaviour
 
     public void HandlePlayerIsAttacking(bool t, CombatInputType combatInputType, int comboCount){
         animator.SetTrigger("IsRightHandStriking");
+        animator.SetBool("IsInCombat", t);
+        isInCombat = true;
+    }
+
+    public void HandleCombatAnimations(){
+        //increase the input count for each time combat input is given
+        animator.SetBool("IsInCombat", true);
+        combatInputCount ++;
+        animator.SetInteger("CombatInputCount", combatInputCount);
+        isInCombat = true;
+    }
+
+    public void HandleCombatAnimationFinished(){
+        if(isInCombat){
+            combatInputCount = -1;
+            Debug.Log("Resetting combat animation count");
+            animator.SetInteger("CombatInputCount", combatInputCount);
+            animator.SetBool("IsInCombat", false);
+            isInCombat = false;
+            //move out of combat state
+            playerCombat.HandleEndState();
+        }
+
     }
 }

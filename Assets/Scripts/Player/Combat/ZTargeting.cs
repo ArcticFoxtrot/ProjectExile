@@ -172,6 +172,7 @@ public class ZTargeting : PlayerState
         if(Input.GetKeyDown(KeyCode.Mouse0)){
             playerFSM.PushState(playerFSM.combatState);
             playerFSM.combatState.SetStartCombatInput(CombatInputType.Block);
+            playerFSM.combatState.SetStartingState(playerFSM.zTargetState);
             EndPlayerState();
         }
     }

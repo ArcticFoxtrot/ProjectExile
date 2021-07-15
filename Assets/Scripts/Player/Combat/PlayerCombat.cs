@@ -11,6 +11,7 @@ public class PlayerCombat : PlayerState
     private int lightCombatInput;
     private int heavyCombatInput;
     private bool blockInput;
+    private PlayerState startingState;
 
     public PlayerCombat(PlayerState state) : base(state)
     {
@@ -18,21 +19,31 @@ public class PlayerCombat : PlayerState
 
     public override void StartPlayerState()
     {
+
         base.StartPlayerState();
-        
+        playerAnimationController.HandleCombatAnimations();
     }
 
     public override void RunPlayerState()
     {
         base.RunPlayerState();
         GetCombatInput();
+    
+    }
+
+    public void HandleInputCount()
+    {
+        lightCombatInput = 0;
+        heavyCombatInput = 0;
+        blockInput = false;
     }
 
     private void GetCombatInput()
     {
         if(Input.GetKeyDown(KeyCode.Mouse0)){
             //TODO implement combos for light combat to chain attacks
-            playerAnimationController.HandlePlayerIsAttacking(true, CombatInputType.Light, lightCombatInput);
+            //playerAnimationController.HandlePlayerIsAttacking(true, CombatInputType.Light, lightCombatInput);
+            playerAnimationController.HandleCombatAnimations();
         }
 
     }
@@ -51,7 +62,15 @@ public class PlayerCombat : PlayerState
         //Debug.Log("Setting combat type to " + type);
         latestInputType = type;
     }
-    
 
+    public override void SetStartingState(PlayerState state){
+        startingState = state;
+    }
 
+    internal void HandleEndState()
+    {
+        //return to the starting state
+        playerFSM.PushState(startingState);
+        EndPlayerState();
+    }
 }

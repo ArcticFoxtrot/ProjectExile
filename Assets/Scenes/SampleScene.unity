@@ -3394,6 +3394,7 @@ MonoBehaviour:
   defaultState: {fileID: 1022444014}
   climbLedgeState: {fileID: 1022444022}
   combatState: {fileID: 1022444024}
+  zTargetState: {fileID: 1022444023}
   stateStack: []
   isPaused: 0
 --- !u!114 &1022444022
