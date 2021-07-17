@@ -26,6 +26,7 @@ public class PlayerController : PlayerState
     [SerializeField] LayerMask groundCheckIgnoreLayer;
     [SerializeField] GameObject slopeCheck;
     [SerializeField] float slopeCheckDist;
+    [SerializeField] float maximumSlopeAngle;
 
     [Header("Player Jump Variables")]
     [Tooltip("Time in seconds for pressing jump button to achieve more jump force")]
@@ -72,7 +73,7 @@ public class PlayerController : PlayerState
         base.RunPlayerState();
         GetMovementInput();
         isGrounded = GroundCheck();
-        SlopeCheck();
+        //SlopeCheck();
         playerAnimationController.HandlePlayerIsGrounded(isGrounded);
     }
 
@@ -197,6 +198,16 @@ public class PlayerController : PlayerState
             //Debug.Log("Hitting object at position " + hitInfo.point);
             Vector3 v = hitInfo.point - transform.position;
             Debug.DrawLine(hitInfo.point, transform.position, Color.red, Vector3.Distance(hitInfo.point, transform.position));
+            float groundAngle = Vector3.Angle(v, transform.forward);
+            //if hit point is higher than the transform, then the angle is upward and we need to check if we can walk/run on this surface or if we need to transition to climb
+            if(hitInfo.point.y > transform.position.y){
+                //Debug.Log("Going uphill");
+                if(groundAngle > maximumSlopeAngle){
+                    Debug.Log("Transition to climb");
+                }
+            }
+            
+
             return v;
         } else {
             return transform.forward;
@@ -209,6 +220,7 @@ public class PlayerController : PlayerState
         //raycast forward to see if there is a surface to climb
         Vector3 rayCastStartPos = new Vector3(transform.position.x, transform.position.y + playerFSM.wallCheckOffset, transform.position.z);
         Ray ray = new Ray(rayCastStartPos, transform.forward);
+        Debug.DrawRay(rayCastStartPos, transform.forward, Color.magenta, .1f);
         if(Physics.Raycast(ray, out RaycastHit hit, playerFSM.climbCheckDist, ~playerFSM.climbCheckIgnoreLayer)){
             playerAnimationController.HandlePlayerIsClimbing(true);
             playerFSM.PushState(freeClimb);

@@ -43,12 +43,10 @@ public class FreeClimb : PlayerState
     private GameObject climbSurface;
     private bool isActiveState = false;
     public Vector3 surfaceSlopeVector;
-    public float surfaceXRotation;
-    public float surfaceYRotation;
     public Vector3 lowerSurfaceHitPoint;
     public Vector3 upperSurfaceHitPoint;
     public Vector3 leftRightSurfaceVector;
-    public Vector3 climbVector;
+    //public Vector3 climbVector;
     public bool rotate = false;
     public float angle;
 
@@ -110,16 +108,20 @@ public class FreeClimb : PlayerState
         Ray upperRay = new Ray(climbSurfaceCheckRaycastPosition.transform.position + new Vector3(0f, climbSurfaceCheckRaycastUpperOffset, 0f), transform.forward);
         Debug.DrawRay(climbSurfaceCheckRaycastPosition.transform.position, transform.forward, Color.green, .1f);
         Debug.DrawRay(climbSurfaceCheckRaycastPosition.transform.position + new Vector3(0f, climbSurfaceCheckRaycastUpperOffset, 0f), transform.forward, Color.green, .1f);
-        if(Physics.Raycast(lowerRay, out RaycastHit hitInfo, climbCheckDist + 1f, ~climbSurfaceCheckIgnoreLayer)){
-            surfaceXRotation = Vector3.Angle(transform.up, hitInfo.collider.transform.up);
-            lowerSurfaceHitPoint = hitInfo.point;
+        RaycastHit lowerHitInfo;
+        if(Physics.Raycast(lowerRay, out lowerHitInfo, climbCheckDist + 1f, ~climbSurfaceCheckIgnoreLayer)){
+           
+            lowerSurfaceHitPoint = lowerHitInfo.point;
         } else {
-            surfaceXRotation = 0f;
+           
             lowerSurfaceHitPoint = Vector3.zero;
         }
 
-        if(Physics.Raycast(upperRay, out RaycastHit upperHitInfo, climbCheckDist + 1f, ~climbSurfaceCheckIgnoreLayer)){
+        RaycastHit upperHitInfo;
+        if(Physics.Raycast(upperRay, out upperHitInfo, climbCheckDist + 1f, ~climbSurfaceCheckIgnoreLayer)){
             upperSurfaceHitPoint = upperHitInfo.point;
+            //set vertical angle for player if higher check has not failed
+            transform.rotation = Quaternion.RotateTowards(transform.rotation, Quaternion.FromToRotation(transform.forward * -1, upperHitInfo.normal) * transform.rotation, climbAdjustAngleSpeed);
         } else {
             upperSurfaceHitPoint = Vector3.zero;
             Debug.Log("No longer upper hit");
@@ -128,6 +130,8 @@ public class FreeClimb : PlayerState
         }
 
         surfaceSlopeVector = upperSurfaceHitPoint - lowerSurfaceHitPoint;
+
+        
 
         //check for the angle to which player is climbing horizontally -> turn corners
         Debug.DrawRay(leftCornerRaycastPosition.transform.position, transform.forward + (transform.right * cornerCheckAngle), Color.magenta, .2f);
@@ -145,7 +149,6 @@ public class FreeClimb : PlayerState
                 } else if(Vector3.Cross(leftCornerHitInfo.normal, upperHitInfo.normal).y < 0f){
                     transform.rotation = Quaternion.RotateTowards(transform.rotation, Quaternion.FromToRotation(transform.forward * -1, leftCornerHitInfo.normal) * transform.rotation, climbAdjustAngleSpeed);
                 } 
-                surfaceYRotation = transform.rotation.eulerAngles.y - angle; 
                 
             }
         } else if(isMovingRight){
@@ -157,7 +160,7 @@ public class FreeClimb : PlayerState
                 } else if (Vector3.Cross(rightCornerHitInfo.normal, upperHitInfo.normal).y > 0f){
                     transform.rotation = Quaternion.RotateTowards(transform.rotation, Quaternion.FromToRotation(transform.forward * -1, rightCornerHitInfo.normal) * transform.rotation, climbAdjustAngleSpeed);
                 }
-                surfaceYRotation = transform.rotation.eulerAngles.y + angle;
+
             }
         } else {
             leftRightSurfaceVector = Vector3.zero;
@@ -183,8 +186,8 @@ public class FreeClimb : PlayerState
     private void Climb(){
         //velocityVector = new Vector3(leftRightSurfaceVector.x * Mathf.Abs(horizontalInput) * climbSpeed, Vector3.up.y * verticalInput * climbSpeed, (leftRightSurfaceVector.z + surfaceSlopeVector.z) * verticalInput * climbSpeed * surfaceSlopeClimbMultiplier);
         //playerRb.velocity = velocityVector;
-        climbVector = new Vector3(leftRightSurfaceVector.x * Mathf.Abs(horizontalInput), Vector3.up.y * verticalInput, leftRightSurfaceVector.z * Mathf.Abs(horizontalInput)) * Time.fixedDeltaTime * climbSpeed;
-        Debug.DrawRay(transform.position, climbVector.normalized, Color.blue, .2f);
+        //climbVector = new Vector3(leftRightSurfaceVector.x * Mathf.Abs(horizontalInput), Vector3.up.y * verticalInput, leftRightSurfaceVector.z * Mathf.Abs(horizontalInput)) * Time.fixedDeltaTime * climbSpeed;
+        //Debug.DrawRay(transform.position, climbVector.normalized, Color.blue, .2f);
         playerAnimationController.HandlePlayerClimbBlend(verticalInput, horizontalInput);
 
     }
