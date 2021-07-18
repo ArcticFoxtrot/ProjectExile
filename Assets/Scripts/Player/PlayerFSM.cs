@@ -13,6 +13,7 @@ public class PlayerFSM : MonoBehaviour
     public PlayerState climbLedgeState;
     public PlayerState combatState;
     public PlayerState zTargetState;
+    public PlayerState transitionToWalkState;
     public List<PlayerState> stateStack;
     public bool isPaused;
 

@@ -23,6 +23,7 @@ public class FreeClimb : PlayerState
     [SerializeField] LayerMask climbSurfaceCheckIgnoreLayer;
     [SerializeField] Transform ledgePointRaycastPosition;
     [SerializeField] float ledgeClimbSpeed = 3f;
+    [SerializeField] float climbToWalkThresholdAngle = 45f;
 
     [Header("Corner Checking Variables")]
     [SerializeField] Transform leftCornerRaycastPosition;
@@ -42,19 +43,21 @@ public class FreeClimb : PlayerState
     private Rigidbody playerRb;
     private GameObject climbSurface;
     private bool isActiveState = false;
-    public Vector3 surfaceSlopeVector;
-    public Vector3 lowerSurfaceHitPoint;
-    public Vector3 upperSurfaceHitPoint;
-    public Vector3 leftRightSurfaceVector;
+    private Vector3 surfaceSlopeVector;
+    private Vector3 lowerSurfaceHitPoint;
+    private Vector3 upperSurfaceHitPoint;
+    private Vector3 leftRightSurfaceVector;
     //public Vector3 climbVector;
-    public bool rotate = false;
-    public float angle;
+    private bool upperRayHasHit = false;
+    private bool lowerRayHasHit = false;
 
 
     private PlayerAnimationController playerAnimationController;
 
     public override void StartPlayerState() {
         isActiveState = true;
+        upperRayHasHit = false;
+        lowerRayHasHit = false;
         playerRb = GetComponent<Rigidbody>();
         playerAnimationController = GetComponentInChildren<PlayerAnimationController>();
         if(!playerRb || playerRb == null){
@@ -110,26 +113,37 @@ public class FreeClimb : PlayerState
         Debug.DrawRay(climbSurfaceCheckRaycastPosition.transform.position + new Vector3(0f, climbSurfaceCheckRaycastUpperOffset, 0f), transform.forward, Color.green, .1f);
         RaycastHit lowerHitInfo;
         if(Physics.Raycast(lowerRay, out lowerHitInfo, climbCheckDist + 1f, ~climbSurfaceCheckIgnoreLayer)){
-           
+            lowerRayHasHit = true;
             lowerSurfaceHitPoint = lowerHitInfo.point;
         } else {
-           
+            lowerRayHasHit = false;
             lowerSurfaceHitPoint = Vector3.zero;
         }
 
         RaycastHit upperHitInfo;
         if(Physics.Raycast(upperRay, out upperHitInfo, climbCheckDist + 1f, ~climbSurfaceCheckIgnoreLayer)){
+            upperRayHasHit = true;
             upperSurfaceHitPoint = upperHitInfo.point;
-            //set vertical angle for player if higher check has not failed
+            //set vertical angle for player if higher check has not failed and the angle of the hit surface is less than the 
             transform.rotation = Quaternion.RotateTowards(transform.rotation, Quaternion.FromToRotation(transform.forward * -1, upperHitInfo.normal) * transform.rotation, climbAdjustAngleSpeed);
         } else {
+            upperRayHasHit = false;
             upperSurfaceHitPoint = Vector3.zero;
             Debug.Log("No longer upper hit");
             //we need to transition to climbing up since the higher check fails
-            TransitionToWalk();
+            TransitionClimbLedge();
         }
 
-        surfaceSlopeVector = upperSurfaceHitPoint - lowerSurfaceHitPoint;
+        if(upperRayHasHit && lowerRayHasHit){
+            surfaceSlopeVector = upperSurfaceHitPoint - lowerSurfaceHitPoint;
+            //Debug.Log("Angle between surface and transform is " + Vector3.Angle(surfaceSlopeVector, Vector3.up));
+            if(Vector3.Angle(surfaceSlopeVector, Vector3.up) > climbToWalkThresholdAngle){
+                //Debug.Log("Threshold has been crossed, transition to walk");
+                TransitionToWalk();
+            }
+        }
+
+       
 
         
 
@@ -167,7 +181,7 @@ public class FreeClimb : PlayerState
         }
     }
 
-    private void TransitionToWalk()
+    private void TransitionClimbLedge()
     {
         //TODO add a check where you see if the player is climbing up or dropping down -> animation transitions are different
          //only trigger this if you are climbing
@@ -175,6 +189,13 @@ public class FreeClimb : PlayerState
         playerFSM.PushState(playerFSM.climbLedgeState);
         EndPlayerState();
         
+    }
+
+    private void TransitionToWalk(){
+        playerAnimationController.HandleIsClimbing(false);
+        playerRb.velocity = Vector3.zero;
+        playerFSM.PushState(playerFSM.transitionToWalkState);
+        EndPlayerState();
     }
 
     private void FixedUpdate(){

@@ -92,4 +92,9 @@ public class PlayerAnimationController : MonoBehaviour
         }
 
     }
+
+    internal void HandleIsClimbing(bool isClimbing)
+    {
+        animator.SetBool("IsClimbing", isClimbing);
+    }
 }
