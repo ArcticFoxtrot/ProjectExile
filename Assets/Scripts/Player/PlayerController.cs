@@ -160,7 +160,7 @@ public class PlayerController : PlayerState
     }
 
     private bool GroundCheck(){
-        CapsuleCollider capsule = GetComponent<CapsuleCollider>();
+        //CapsuleCollider capsule = GetComponent<CapsuleCollider>();
         RaycastHit hit;
         Ray ray = new Ray(transform.position + new Vector3(0, 0.1f, 0), Vector3.down);
         

@@ -57,10 +57,10 @@ public class ClimbLedge : PlayerState
         playerAnimationController.HandlePlayerIsClimbing(false);
         playerAnimationController.HandlePlayerIsClimbingLedge(true);
     
-        Debug.DrawRay(ledgePointRaycastPosition.transform.position, Vector3.down, Color.green, 15f);
+        Debug.DrawRay(ledgePointRaycastPosition.transform.position, transform.up * -1, Color.yellow, 15f);
         
         if(climbPointChecked == false){
-            Ray ledgeRay = new Ray(ledgePointRaycastPosition.transform.position, Vector3.down);
+            Ray ledgeRay = new Ray(ledgePointRaycastPosition.transform.position, transform.up * -1);
             if(Physics.Raycast(ledgeRay, out RaycastHit ledgeHitInfo, ledgeClimbCheckDist, ~playerFSM.climbCheckIgnoreLayer)){
                 Debug.Log("Climbledge found a ledge point!");
                 climbPointChecked = true;

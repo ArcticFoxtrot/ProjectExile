@@ -1,66 +1,5 @@
 %YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
---- !u!114 &5154871108225810770
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 5154871109850880856}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: acebbc840f0f0064eb78ffd0ba4a227e, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
---- !u!114 &5154871108225810769
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 5154871109850880856}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: c5479b3ba4e0098438c4492bb229cbc2, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  playerObject: {fileID: 5154871108270733758}
-  ignorePlayerLayer:
-    serializedVersion: 2
-    m_Bits: 64
-  handIKRaycastPosition: {fileID: 5154871108291535350}
-  leftHandIKRaycastPosition: {fileID: 5154871109850646386}
-  rightHandIKRaycastPosition: {fileID: 5154871109850646332}
-  handIKRaycastDist: 100
-  handIKRaycastAngle: 0.35
-  handIKRaycastAngleBetween: 0.3
-  handIKWeight: 0.1
-  leftHandOffset: {x: 0, y: 0, z: 0}
-  rightHandOffset: {x: 0, y: 0, z: 0}
-  leftFootIKRaycastPosition: {fileID: 5154871109850646348}
-  rightFootIKRaycastPosition: {fileID: 5154871109850646294}
-  footIKRaycastDist: 0.4
-  leftFootOffset: {x: 0.1, y: 0, z: 0.15}
-  rightFootOffset: {x: -0.1, y: 0, z: 0.15}
-  footIKWeight: 0.2
-  leftFootRotOffset: {x: 0.4619398, y: -0.1913417, z: -0.19134173, w: 0.8446232}
-  rightFootRotOffset: {x: 0.4619398, y: 0.19134171, z: 0.19134171, w: 0.8446232}
-  playerYRotation: 0
-  raycastposRotY: 0
-  useIK: 1
-  leftHandIK: 0
-  rightHandIK: 0
-  leftFootIK: 0
-  rightFootIK: 0
-  leftHandPos: {x: 0, y: 0, z: 0}
-  rightHandPos: {x: 0, y: 0, z: 0}
-  leftFootPos: {x: 0, y: 0, z: 0}
-  rightFootPos: {x: 0, y: 0, z: 0}
-  leftHandRot: {x: 0, y: 0, z: 0, w: 0}
-  rightHandRot: {x: 0, y: 0, z: 0, w: 0}
-  leftFootRot: {x: 0, y: 0, z: 0, w: 0}
-  rightFootRot: {x: 0, y: 0, z: 0, w: 0}
-  animator: {fileID: 5154871109841365144}
 --- !u!1 &5154871108270733755
 GameObject:
   m_ObjectHideFlags: 0
@@ -85,6 +24,7 @@ GameObject:
   - component: {fileID: 5154871108270733733}
   - component: {fileID: 5154871108270733732}
   - component: {fileID: 5154871108270733739}
+  - component: {fileID: 2001809454}
   m_Layer: 6
   m_Name: Player
   m_TagString: Player
@@ -220,12 +160,13 @@ MonoBehaviour:
   zTargeting: {fileID: 5154871108270733732}
   moveSpeed: 20
   turnSpeed: 25
-  groundCheckDist: 0.2
+  groundCheckDist: 0.5
   groundCheckIgnoreLayer:
     serializedVersion: 2
     m_Bits: 64
   slopeCheck: {fileID: 5154871109311015056}
   slopeCheckDist: 2
+  maximumSlopeAngle: 35
   highJumpThreshold: 0.3
   highJumpModifier: 2
   jumpForce: 15
@@ -334,6 +275,7 @@ MonoBehaviour:
     m_Bits: 64
   ledgePointRaycastPosition: {fileID: 5154871110002755366}
   ledgeClimbSpeed: 3
+  climbToWalkThresholdAngle: 45
   leftCornerRaycastPosition: {fileID: 5154871108859376504}
   rightCornerRaycastPosition: {fileID: 5154871109733909857}
   cornerCheckAngle: 0.6
@@ -341,15 +283,6 @@ MonoBehaviour:
   cornerAdjustAngleSpeed: 100
   isClimbing: 0
   horizontalInput: 0
-  surfaceSlopeVector: {x: 0, y: 0, z: 0}
-  surfaceXRotation: 0
-  surfaceYRotation: 0
-  lowerSurfaceHitPoint: {x: 0, y: 0, z: 0}
-  upperSurfaceHitPoint: {x: 0, y: 0, z: 0}
-  leftRightSurfaceVector: {x: 0, y: 0, z: 0}
-  climbVector: {x: 0, y: 0, z: 0}
-  rotate: 0
-  angle: 0
 --- !u!114 &5154871108270733734
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -363,7 +296,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   wallCheckOffset: 1
-  climbCheckDist: 0.3
+  climbCheckDist: 0.75
   climbCheckIgnoreLayer:
     serializedVersion: 2
     m_Bits: 64
@@ -371,6 +304,7 @@ MonoBehaviour:
   climbLedgeState: {fileID: 5154871108270733733}
   combatState: {fileID: 5154871108270733739}
   zTargetState: {fileID: 5154871108270733732}
+  transitionToWalkState: {fileID: 2001809454}
   stateStack: []
   isPaused: 0
 --- !u!114 &5154871108270733733
@@ -433,6 +367,22 @@ MonoBehaviour:
   defaultState: {fileID: 5154871108270733757}
   latestInputType: 0
   playerAnimationController: {fileID: 5154871108225810770}
+--- !u!114 &2001809454
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5154871108270733755}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 67eaf2ef254000b48b6a3c724ab1bbb5, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  playerFSM: {fileID: 5154871108270733734}
+  defaultState: {fileID: 5154871108270733757}
+  isRotated: 0
+  rotateUpSpeed: 25
 --- !u!1 &5154871108291535351
 GameObject:
   m_ObjectHideFlags: 0
@@ -760,6 +710,67 @@ Transform:
   m_Father: {fileID: 5154871108270733758}
   m_RootOrder: 11
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &5154871108225810769
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5154871109850880856}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c5479b3ba4e0098438c4492bb229cbc2, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  playerObject: {fileID: 5154871108270733758}
+  ignorePlayerLayer:
+    serializedVersion: 2
+    m_Bits: 64
+  handIKRaycastPosition: {fileID: 5154871108291535350}
+  leftHandIKRaycastPosition: {fileID: 5154871109850646386}
+  rightHandIKRaycastPosition: {fileID: 5154871109850646332}
+  handIKRaycastDist: 100
+  handIKRaycastAngle: 0.35
+  handIKRaycastAngleBetween: 0.3
+  handIKWeight: 0.1
+  leftHandOffset: {x: 0, y: 0, z: 0}
+  rightHandOffset: {x: 0, y: 0, z: 0}
+  leftFootIKRaycastPosition: {fileID: 5154871109850646348}
+  rightFootIKRaycastPosition: {fileID: 5154871109850646294}
+  footIKRaycastDist: 0.4
+  leftFootOffset: {x: 0.1, y: 0, z: 0.15}
+  rightFootOffset: {x: -0.1, y: 0, z: 0.15}
+  footIKWeight: 0.2
+  leftFootRotOffset: {x: 0.4619398, y: -0.1913417, z: -0.19134173, w: 0.8446232}
+  rightFootRotOffset: {x: 0.4619398, y: 0.19134171, z: 0.19134171, w: 0.8446232}
+  playerYRotation: 0
+  raycastposRotY: 0
+  useIK: 1
+  leftHandIK: 0
+  rightHandIK: 0
+  leftFootIK: 0
+  rightFootIK: 0
+  leftHandPos: {x: 0, y: 0, z: 0}
+  rightHandPos: {x: 0, y: 0, z: 0}
+  leftFootPos: {x: 0, y: 0, z: 0}
+  rightFootPos: {x: 0, y: 0, z: 0}
+  leftHandRot: {x: 0, y: 0, z: 0, w: 0}
+  rightHandRot: {x: 0, y: 0, z: 0, w: 0}
+  leftFootRot: {x: 0, y: 0, z: 0, w: 0}
+  rightFootRot: {x: 0, y: 0, z: 0, w: 0}
+  animator: {fileID: 5154871109841365144}
+--- !u!114 &5154871108225810770
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5154871109850880856}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: acebbc840f0f0064eb78ffd0ba4a227e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &5154871110002755367
 GameObject:
   m_ObjectHideFlags: 0
@@ -1128,6 +1139,11 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 400000, guid: 31bc5299503c0fe4db0163e0888f5bc8, type: 3}
   m_PrefabInstance: {fileID: 5154871109850783224}
   m_PrefabAsset: {fileID: 0}
+--- !u!95 &5154871109841365144 stripped
+Animator:
+  m_CorrespondingSourceObject: {fileID: 9500000, guid: 31bc5299503c0fe4db0163e0888f5bc8, type: 3}
+  m_PrefabInstance: {fileID: 5154871109850783224}
+  m_PrefabAsset: {fileID: 0}
 --- !u!4 &5154871109850646386 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 400010, guid: 31bc5299503c0fe4db0163e0888f5bc8, type: 3}
@@ -1151,10 +1167,5 @@ Transform:
 --- !u!1 &5154871109850880856 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 100000, guid: 31bc5299503c0fe4db0163e0888f5bc8, type: 3}
-  m_PrefabInstance: {fileID: 5154871109850783224}
-  m_PrefabAsset: {fileID: 0}
---- !u!95 &5154871109841365144 stripped
-Animator:
-  m_CorrespondingSourceObject: {fileID: 9500000, guid: 31bc5299503c0fe4db0163e0888f5bc8, type: 3}
   m_PrefabInstance: {fileID: 5154871109850783224}
   m_PrefabAsset: {fileID: 0}

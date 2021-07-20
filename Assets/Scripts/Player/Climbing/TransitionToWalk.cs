@@ -12,6 +12,7 @@ public class TransitionToWalk : PlayerState
 
     public bool isRotated = false;
     [SerializeField] float rotateUpSpeed = 1f;
+    [SerializeField] float upAngleLimit;
 
     public override void StartPlayerState()
     {
@@ -37,8 +38,8 @@ public class TransitionToWalk : PlayerState
     private void CheckRotation()
     {
         //checks if the player's transform is pointing upward
-        Debug.Log("Angle between up and transform up is " + Vector3.Angle(transform.up, Vector3.up));
-        if(Vector3.Angle(transform.up, Vector3.up) < .01f){
+        //Debug.Log("Angle between up and transform up is " + Vector3.Angle(transform.up, Vector3.up));
+        if(Vector3.Angle(transform.up, Vector3.up) < upAngleLimit){
             isRotated = true;
         }
     }

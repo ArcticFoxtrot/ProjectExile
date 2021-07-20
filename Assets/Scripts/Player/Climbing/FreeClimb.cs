@@ -130,8 +130,11 @@ public class FreeClimb : PlayerState
             upperRayHasHit = false;
             upperSurfaceHitPoint = Vector3.zero;
             Debug.Log("No longer upper hit");
-            //we need to transition to climbing up since the higher check fails
-            TransitionClimbLedge();
+            if(!isMovingLeft && !isMovingRight){
+            //we need to transition to climbing up since the higher check fails and not moving left or right
+                TransitionClimbLedge();
+            }
+
         }
 
         if(upperRayHasHit && lowerRayHasHit){
@@ -167,11 +170,14 @@ public class FreeClimb : PlayerState
             }
         } else if(isMovingRight){
             if(Physics.Raycast(rightCornerRay, out RaycastHit rightCornerHitInfo, cornerCheckDist, ~climbSurfaceCheckIgnoreLayer)){
+                Debug.Log("Got here!");
                 leftRightSurfaceVector = rightCornerHitInfo.point - new Vector3(upperHitInfo.point.x, rightCornerHitInfo.point.y, upperHitInfo.point.z);
                 Debug.DrawLine(new Vector3(upperHitInfo.point.x, rightCornerHitInfo.point.y, upperHitInfo.point.z), rightCornerHitInfo.point, Color.white, .2f );
                 if(Vector3.Cross(rightCornerHitInfo.normal, upperHitInfo.normal).y == 0f){
+                    Debug.Log("Got here 2!");
                     transform.rotation = Quaternion.RotateTowards(transform.rotation, Quaternion.FromToRotation(transform.forward * -1, upperHitInfo.normal) * transform.rotation, climbAdjustAngleSpeed);
                 } else if (Vector3.Cross(rightCornerHitInfo.normal, upperHitInfo.normal).y > 0f){
+                    Debug.Log("Should rotate to angle!");
                     transform.rotation = Quaternion.RotateTowards(transform.rotation, Quaternion.FromToRotation(transform.forward * -1, rightCornerHitInfo.normal) * transform.rotation, climbAdjustAngleSpeed);
                 }
 
