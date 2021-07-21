@@ -15,6 +15,8 @@ public class FreeClimb : PlayerState
     [SerializeField] float climbCheckDist = .2f;
     [SerializeField] float climbSpeed = 1f;
     [SerializeField] float climbAdjustAngleSpeed = 1f;
+    [SerializeField] float cornerTurnSpeedModifier = 1f;
+    [SerializeField] float snapToSurfaceSpeed = 1f;
 
     [Header("Surface Adaptation Variables")]
     [SerializeField] Transform climbSurfaceCheckRaycastPosition;
@@ -32,6 +34,9 @@ public class FreeClimb : PlayerState
     [SerializeField] float cornerCheckDist = 1f;
     [SerializeField] float cornerAdjustAngleSpeed = 0.5f;
 
+    [Header("Required components from Player")]
+    [SerializeField] CapsuleCollider playerCollider;
+
     public bool isClimbing = false;
 
     public float horizontalInput;
@@ -45,8 +50,12 @@ public class FreeClimb : PlayerState
     private bool isActiveState = false;
     private Vector3 surfaceSlopeVector;
     private Vector3 lowerSurfaceHitPoint;
-    private Vector3 upperSurfaceHitPoint;
+    public Vector3 upperSurfaceHitPoint;
     private Vector3 leftRightSurfaceVector;
+    private GameObject upperHitObject;
+    public bool isOnClimbObject = true;
+    public float distFromObject;
+    
     //public Vector3 climbVector;
     private bool upperRayHasHit = false;
     private bool lowerRayHasHit = false;
@@ -71,8 +80,12 @@ public class FreeClimb : PlayerState
 
     public override void RunPlayerState() {
         base.RunPlayerState();
+        if(!isOnClimbObject){
+            SnapToClimbSurface();
+        }
         GetClimbInput();
         SurfaceCheck();
+
     }
 
     public override void EndPlayerState()
@@ -106,6 +119,16 @@ public class FreeClimb : PlayerState
 
     }
 
+    private void SnapToClimbSurface()
+    {
+        //move the player object to the climbable surface
+        //move only on the x and z axes
+        Vector3 diffVector = upperSurfaceHitPoint - transform.position;
+        diffVector.y = 0f;
+        diffVector.Normalize();
+        playerRb.MovePosition(transform.position + diffVector * snapToSurfaceSpeed * Time.fixedDeltaTime);
+    }
+
     private void SurfaceCheck(){
         Ray lowerRay = new Ray(climbSurfaceCheckRaycastPosition.transform.position, transform.forward);
         Ray upperRay = new Ray(climbSurfaceCheckRaycastPosition.transform.position + new Vector3(0f, climbSurfaceCheckRaycastUpperOffset, 0f), transform.forward);
@@ -124,8 +147,20 @@ public class FreeClimb : PlayerState
         if(Physics.Raycast(upperRay, out upperHitInfo, climbCheckDist + 1f, ~climbSurfaceCheckIgnoreLayer)){
             upperRayHasHit = true;
             upperSurfaceHitPoint = upperHitInfo.point;
+            upperHitObject = upperHitInfo.transform.gameObject;
             //set vertical angle for player if higher check has not failed and the angle of the hit surface is less than the 
             transform.rotation = Quaternion.RotateTowards(transform.rotation, Quaternion.FromToRotation(transform.forward * -1, upperHitInfo.normal) * transform.rotation, climbAdjustAngleSpeed);
+            //check distance between player and climbed object ignoring the Y
+            Vector3 a = new Vector3(upperSurfaceHitPoint.x, 0f, upperSurfaceHitPoint.z);
+            Vector3 b = new Vector3(transform.position.x, 0f, transform.position.z);
+            distFromObject = Vector3.Distance(a, b);
+            if(distFromObject > playerCollider.radius + .01f){ //TODO make dynamic?
+                isOnClimbObject = false;
+            } else {
+                isOnClimbObject = true;
+            }
+        
+        
         } else {
             upperRayHasHit = false;
             upperSurfaceHitPoint = Vector3.zero;
@@ -177,8 +212,8 @@ public class FreeClimb : PlayerState
                     Debug.Log("Got here 2!");
                     transform.rotation = Quaternion.RotateTowards(transform.rotation, Quaternion.FromToRotation(transform.forward * -1, upperHitInfo.normal) * transform.rotation, climbAdjustAngleSpeed);
                 } else if (Vector3.Cross(rightCornerHitInfo.normal, upperHitInfo.normal).y > 0f){
-                    Debug.Log("Should rotate to angle!");
-                    transform.rotation = Quaternion.RotateTowards(transform.rotation, Quaternion.FromToRotation(transform.forward * -1, rightCornerHitInfo.normal) * transform.rotation, climbAdjustAngleSpeed);
+                    //initiate corner out animation instead?
+                    transform.rotation = Quaternion.RotateTowards(transform.rotation, Quaternion.FromToRotation(transform.forward * -1, rightCornerHitInfo.normal) * transform.rotation, climbAdjustAngleSpeed * cornerTurnSpeedModifier);
                 }
 
             }
@@ -236,5 +271,4 @@ public class FreeClimb : PlayerState
         jumpInput = Input.GetButton("Jump");
         //HandleJump(); //TODO create function to jump off wall
     }
-
 }
